@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'required' => ':attribute: 请检查提交的信息。',
+    'string' => ':attribute: 请检查提交的信息。',
+    'email' => ':attribute: 请检查提交的信息。',
+    'confirmed' => ':attribute: 请检查提交的信息。',
+    'unique' => ':attribute: 请检查提交的信息。',
+    'in' => ':attribute: 请检查提交的信息。',
+    'boolean' => ':attribute: 请检查提交的信息。',
+    'image' => ':attribute: 请检查提交的信息。',
+    'mimes' => ':attribute: 请检查提交的信息。',
+    'dimensions' => ':attribute: 请检查提交的信息。',
+    'not_regex' => ':attribute: 请检查提交的信息。',
+    'size' => ['string' => ':attribute: 请检查提交的信息。'],
+    'current_password' => '当前密码不正确。',
+    'min' => ['string' => ':attribute: 请检查提交的信息。'],
+    'max' => ['string' => ':attribute: 请检查提交的信息。', 'file' => 'JPEG、PNG 或 WebP，最大 2 MB、2048 × 2048 像素。图片为公开资源。'],
+    'password' => ['letters' => '12–64 个字符，包含大写字母、小写字母、数字和符号。', 'mixed' => '12–64 个字符，包含大写字母、小写字母、数字和符号。', 'numbers' => '12–64 个字符，包含大写字母、小写字母、数字和符号。', 'symbols' => '12–64 个字符，包含大写字母、小写字母、数字和符号。'],
+    'attributes' => [
+        'body' => '评论内容',
+        'website' => '请将此项留空',
+        'name' => '显示名称',
+        'email' => '电子邮箱',
+        'password' => '密码',
+        'password_confirmation' => '确认密码',
+        'current_password' => '当前密码',
+        'avatar' => '头像',
+        'preferred_locale' => '邮件语言',
+        'reply_notifications' => '我的评论收到已批准的回复时发送邮件',
+        'reason' => '举报原因',
+    ],
+];

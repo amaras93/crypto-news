@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><title>CryptoNews OFFLINE TEST FIXTURE — fictional metadata</title>
+<item><guid>test-bitcoin-001</guid><title>TEST FIXTURE: Bitcoin research examines fictional long term custody trends</title><link>https://publisher.com/news/fictional-bitcoin?utm_source=fixture</link><description><![CDATA[<p>Fictional development preview. This is not actual financial news.</p>]]></description><pubDate>Mon, 16 Nov 2026 08:00:00 +0000</pubDate></item>
+<item><guid>test-gold-002</guid><title>TEST FIXTURE: Gold study outlines an imaginary reserve scenario</title><link>https://publisher.com/news/fictional-gold</link><description>Fictional licensed excerpt for deterministic tests only.</description><pubDate>Mon, 16 Nov 2026 09:00:00 +0000</pubDate></item>
+<item><guid>test-uncertain-003</guid><title>TEST FIXTURE: A fictional editorial briefing awaits human review</title><link>https://publisher.com/news/fictional-briefing</link></item>
+</channel></rss>
+

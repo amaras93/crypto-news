@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'required' => ':attribute: Controlla i dati inseriti.',
+    'string' => ':attribute: Controlla i dati inseriti.',
+    'email' => ':attribute: Controlla i dati inseriti.',
+    'confirmed' => ':attribute: Controlla i dati inseriti.',
+    'unique' => ':attribute: Controlla i dati inseriti.',
+    'in' => ':attribute: Controlla i dati inseriti.',
+    'boolean' => ':attribute: Controlla i dati inseriti.',
+    'image' => ':attribute: Controlla i dati inseriti.',
+    'mimes' => ':attribute: Controlla i dati inseriti.',
+    'dimensions' => ':attribute: Controlla i dati inseriti.',
+    'not_regex' => ':attribute: Controlla i dati inseriti.',
+    'size' => ['string' => ':attribute: Controlla i dati inseriti.'],
+    'current_password' => 'La password attuale non è corretta.',
+    'min' => ['string' => ':attribute: Controlla i dati inseriti.'],
+    'max' => ['string' => ':attribute: Controlla i dati inseriti.', 'file' => 'JPEG, PNG o WebP; massimo 2 MB e 2048 × 2048 pixel. Le immagini sono pubbliche.'],
+    'password' => ['letters' => 'Da 12 a 64 caratteri con maiuscola, minuscola, numero e simbolo.', 'mixed' => 'Da 12 a 64 caratteri con maiuscola, minuscola, numero e simbolo.', 'numbers' => 'Da 12 a 64 caratteri con maiuscola, minuscola, numero e simbolo.', 'symbols' => 'Da 12 a 64 caratteri con maiuscola, minuscola, numero e simbolo.'],
+    'attributes' => [
+        'body' => 'Il tuo commento',
+        'website' => 'Lascia vuoto questo campo',
+        'name' => 'Nome visualizzato',
+        'email' => 'Indirizzo email',
+        'password' => 'Password',
+        'password_confirmation' => 'Conferma password',
+        'current_password' => 'Password attuale',
+        'avatar' => 'Immagine del profilo',
+        'preferred_locale' => 'Lingua delle email',
+        'reply_notifications' => 'Avvisami quando una risposta al mio commento viene approvata',
+        'reason' => 'Motivo della segnalazione',
+    ],
+];

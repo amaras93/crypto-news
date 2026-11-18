@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'required' => ':attribute: Revisa los datos enviados.',
+    'string' => ':attribute: Revisa los datos enviados.',
+    'email' => ':attribute: Revisa los datos enviados.',
+    'confirmed' => ':attribute: Revisa los datos enviados.',
+    'unique' => ':attribute: Revisa los datos enviados.',
+    'in' => ':attribute: Revisa los datos enviados.',
+    'boolean' => ':attribute: Revisa los datos enviados.',
+    'image' => ':attribute: Revisa los datos enviados.',
+    'mimes' => ':attribute: Revisa los datos enviados.',
+    'dimensions' => ':attribute: Revisa los datos enviados.',
+    'not_regex' => ':attribute: Revisa los datos enviados.',
+    'size' => ['string' => ':attribute: Revisa los datos enviados.'],
+    'current_password' => 'La contraseña actual es incorrecta.',
+    'min' => ['string' => ':attribute: Revisa los datos enviados.'],
+    'max' => ['string' => ':attribute: Revisa los datos enviados.', 'file' => 'JPEG, PNG o WebP; hasta 2 MB y 2048 × 2048 píxeles. Las imágenes son públicas.'],
+    'password' => ['letters' => 'De 12 a 64 caracteres con mayúscula, minúscula, número y símbolo.', 'mixed' => 'De 12 a 64 caracteres con mayúscula, minúscula, número y símbolo.', 'numbers' => 'De 12 a 64 caracteres con mayúscula, minúscula, número y símbolo.', 'symbols' => 'De 12 a 64 caracteres con mayúscula, minúscula, número y símbolo.'],
+    'attributes' => [
+        'body' => 'Tu comentario',
+        'website' => 'Deja este campo vacío',
+        'name' => 'Nombre visible',
+        'email' => 'Correo electrónico',
+        'password' => 'Contraseña',
+        'password_confirmation' => 'Confirmar contraseña',
+        'current_password' => 'Contraseña actual',
+        'avatar' => 'Imagen de perfil',
+        'preferred_locale' => 'Idioma de los correos',
+        'reply_notifications' => 'Avisarme por correo cuando se apruebe una respuesta a mi comentario',
+        'reason' => 'Motivo de la denuncia',
+    ],
+];

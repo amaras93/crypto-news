@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'required' => ':attribute: Veuillez vérifier les informations saisies.',
+    'string' => ':attribute: Veuillez vérifier les informations saisies.',
+    'email' => ':attribute: Veuillez vérifier les informations saisies.',
+    'confirmed' => ':attribute: Veuillez vérifier les informations saisies.',
+    'unique' => ':attribute: Veuillez vérifier les informations saisies.',
+    'in' => ':attribute: Veuillez vérifier les informations saisies.',
+    'boolean' => ':attribute: Veuillez vérifier les informations saisies.',
+    'image' => ':attribute: Veuillez vérifier les informations saisies.',
+    'mimes' => ':attribute: Veuillez vérifier les informations saisies.',
+    'dimensions' => ':attribute: Veuillez vérifier les informations saisies.',
+    'not_regex' => ':attribute: Veuillez vérifier les informations saisies.',
+    'size' => ['string' => ':attribute: Veuillez vérifier les informations saisies.'],
+    'current_password' => 'Le mot de passe actuel est incorrect.',
+    'min' => ['string' => ':attribute: Veuillez vérifier les informations saisies.'],
+    'max' => ['string' => ':attribute: Veuillez vérifier les informations saisies.', 'file' => 'JPEG, PNG ou WebP ; 2 Mo et 2048 × 2048 pixels maximum. Images publiques.'],
+    'password' => ['letters' => '12 à 64 caractères, avec majuscule, minuscule, chiffre et symbole.', 'mixed' => '12 à 64 caractères, avec majuscule, minuscule, chiffre et symbole.', 'numbers' => '12 à 64 caractères, avec majuscule, minuscule, chiffre et symbole.', 'symbols' => '12 à 64 caractères, avec majuscule, minuscule, chiffre et symbole.'],
+    'attributes' => [
+        'body' => 'Votre commentaire',
+        'website' => 'Laissez ce champ vide',
+        'name' => 'Nom affiché',
+        'email' => 'Adresse e-mail',
+        'password' => 'Mot de passe',
+        'password_confirmation' => 'Confirmer le mot de passe',
+        'current_password' => 'Mot de passe actuel',
+        'avatar' => 'Photo de profil',
+        'preferred_locale' => 'Langue des e-mails',
+        'reply_notifications' => 'M’avertir par e-mail lorsqu’une réponse à mon commentaire est approuvée',
+        'reason' => 'Motif du signalement',
+    ],
+];

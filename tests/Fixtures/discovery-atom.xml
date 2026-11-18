@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="fr"><title>OFFLINE TEST FIXTURE — fictional metadata</title>
+<entry xml:lang="fr"><id>urn:test:atom:1</id><title>TEST FIXTURE : Ethereum, une étude entièrement fictive</title><link rel="alternate" href="https://publisher.com/news/fictional-ethereum"/><summary>Résumé fictif pour les tests uniquement.</summary><published>2026-11-16T10:00:00Z</published></entry>
+<entry xml:lang="ja"><id>urn:test:atom:2</id><title>TEST FIXTURE：ビットコインの架空の調査</title><link href="https://publisher.com/news/fictional-japanese"/><updated>2026-11-16T11:00:00Z</updated></entry>
+</feed>
+

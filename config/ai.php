@@ -1,0 +1,31 @@
+<?php
+
+return [
+    'candidate_processing_enabled' => (bool) env('AI_CANDIDATE_PROCESSING_ENABLED', false),
+    'generation_enabled' => (bool) env('AI_GENERATION_ENABLED', false),
+    'translation_enabled' => (bool) env('AI_TRANSLATION_ENABLED', false),
+    'scheduled_generation_enabled' => (bool) env('AI_SCHEDULED_GENERATION_ENABLED', false),
+    'automatic_publishing' => false,
+    'emergency_stop' => (bool) env('AI_EMERGENCY_STOP', true),
+    'provider' => env('AI_PROVIDER', 'openai'),
+    'model' => env('AI_MODEL', ''),
+    'openai_key' => env('OPENAI_API_KEY', ''),
+    'timeout' => min(45, max(5, (int) env('AI_REQUEST_TIMEOUT', 30))),
+    'daily_limit_microusd' => (int) env('AI_DAILY_LIMIT_MICROUSD', 0),
+    'monthly_limit_microusd' => (int) env('AI_MONTHLY_LIMIT_MICROUSD', 0),
+    'max_articles_per_day' => (int) env('AI_MAX_ARTICLES_PER_DAY', 0),
+    'max_translation_languages' => min(7, max(0, (int) env('AI_MAX_TRANSLATION_LANGUAGES', 0))),
+    'max_concurrent_jobs' => min(5, max(1, (int) env('AI_MAX_CONCURRENT_JOBS', 1))),
+    'max_input_tokens' => min(64000, max(2000, (int) env('AI_MAX_INPUT_TOKENS', 32000))),
+    'max_output_tokens' => min(12000, max(500, (int) env('AI_MAX_OUTPUT_TOKENS', 5000))),
+    'max_attempts' => 3,
+    'evidence_max_age_hours' => 168,
+    'pricing' => [
+        'model' => env('AI_PRICING_MODEL', ''),
+        'verified_at' => env('AI_PRICING_VERIFIED_AT', ''),
+        'input' => (int) env('AI_INPUT_MICROUSD_PER_MILLION', 0),
+        'cached' => (int) env('AI_CACHED_INPUT_MICROUSD_PER_MILLION', 0),
+        'write' => (int) env('AI_CACHE_WRITE_MICROUSD_PER_MILLION', 0),
+        'output' => (int) env('AI_OUTPUT_MICROUSD_PER_MILLION', 0),
+    ],
+];

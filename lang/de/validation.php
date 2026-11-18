@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'required' => ':attribute: Bitte prüfen Sie Ihre Angaben.',
+    'string' => ':attribute: Bitte prüfen Sie Ihre Angaben.',
+    'email' => ':attribute: Bitte prüfen Sie Ihre Angaben.',
+    'confirmed' => ':attribute: Bitte prüfen Sie Ihre Angaben.',
+    'unique' => ':attribute: Bitte prüfen Sie Ihre Angaben.',
+    'in' => ':attribute: Bitte prüfen Sie Ihre Angaben.',
+    'boolean' => ':attribute: Bitte prüfen Sie Ihre Angaben.',
+    'image' => ':attribute: Bitte prüfen Sie Ihre Angaben.',
+    'mimes' => ':attribute: Bitte prüfen Sie Ihre Angaben.',
+    'dimensions' => ':attribute: Bitte prüfen Sie Ihre Angaben.',
+    'not_regex' => ':attribute: Bitte prüfen Sie Ihre Angaben.',
+    'size' => ['string' => ':attribute: Bitte prüfen Sie Ihre Angaben.'],
+    'current_password' => 'Das aktuelle Passwort ist falsch.',
+    'min' => ['string' => ':attribute: Bitte prüfen Sie Ihre Angaben.'],
+    'max' => ['string' => ':attribute: Bitte prüfen Sie Ihre Angaben.', 'file' => 'JPEG, PNG oder WebP; bis 2 MB und 2048 × 2048 Pixel. Bilder sind öffentlich.'],
+    'password' => ['letters' => '12–64 Zeichen mit Großbuchstaben, Kleinbuchstaben, Zahl und Sonderzeichen.', 'mixed' => '12–64 Zeichen mit Großbuchstaben, Kleinbuchstaben, Zahl und Sonderzeichen.', 'numbers' => '12–64 Zeichen mit Großbuchstaben, Kleinbuchstaben, Zahl und Sonderzeichen.', 'symbols' => '12–64 Zeichen mit Großbuchstaben, Kleinbuchstaben, Zahl und Sonderzeichen.'],
+    'attributes' => [
+        'body' => 'Ihr Kommentar',
+        'website' => 'Dieses Feld leer lassen',
+        'name' => 'Anzeigename',
+        'email' => 'E-Mail-Adresse',
+        'password' => 'Passwort',
+        'password_confirmation' => 'Passwort bestätigen',
+        'current_password' => 'Aktuelles Passwort',
+        'avatar' => 'Profilbild',
+        'preferred_locale' => 'E-Mail-Sprache',
+        'reply_notifications' => 'E-Mail bei freigegebenen Antworten auf meine Kommentare',
+        'reason' => 'Meldegrund',
+    ],
+];

@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'required' => ':attribute: 入力内容を確認してください。',
+    'string' => ':attribute: 入力内容を確認してください。',
+    'email' => ':attribute: 入力内容を確認してください。',
+    'confirmed' => ':attribute: 入力内容を確認してください。',
+    'unique' => ':attribute: 入力内容を確認してください。',
+    'in' => ':attribute: 入力内容を確認してください。',
+    'boolean' => ':attribute: 入力内容を確認してください。',
+    'image' => ':attribute: 入力内容を確認してください。',
+    'mimes' => ':attribute: 入力内容を確認してください。',
+    'dimensions' => ':attribute: 入力内容を確認してください。',
+    'not_regex' => ':attribute: 入力内容を確認してください。',
+    'size' => ['string' => ':attribute: 入力内容を確認してください。'],
+    'current_password' => '現在のパスワードが正しくありません。',
+    'min' => ['string' => ':attribute: 入力内容を確認してください。'],
+    'max' => ['string' => ':attribute: 入力内容を確認してください。', 'file' => 'JPEG・PNG・WebP、2 MB・2048 × 2048ピクセル以下。画像は公開されます。'],
+    'password' => ['letters' => '12～64文字で、大文字・小文字・数字・記号を含めてください。', 'mixed' => '12～64文字で、大文字・小文字・数字・記号を含めてください。', 'numbers' => '12～64文字で、大文字・小文字・数字・記号を含めてください。', 'symbols' => '12～64文字で、大文字・小文字・数字・記号を含めてください。'],
+    'attributes' => [
+        'body' => 'コメント本文',
+        'website' => 'この項目は空欄にしてください',
+        'name' => '表示名',
+        'email' => 'メールアドレス',
+        'password' => 'パスワード',
+        'password_confirmation' => 'パスワードを確認',
+        'current_password' => '現在のパスワード',
+        'avatar' => 'プロフィール画像',
+        'preferred_locale' => 'メールの言語',
+        'reply_notifications' => '自分のコメントへの返信が承認されたらメールで通知する',
+        'reason' => '通報理由',
+    ],
+];
