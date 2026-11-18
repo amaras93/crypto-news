@@ -73,6 +73,7 @@ return new class extends Migration
         Schema::dropIfExists('comment_likes');
         Schema::dropIfExists('comments');
         Schema::table('users', function (Blueprint $table): void {
+            $table->dropIndex('users_community_suspended_at_index');
             $table->dropColumn(['avatar_path', 'preferred_locale', 'reply_notifications', 'community_suspended_at']);
         });
     }

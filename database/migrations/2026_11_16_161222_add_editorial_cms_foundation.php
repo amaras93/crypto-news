@@ -39,6 +39,9 @@ return new class extends Migration
         Schema::dropIfExists('editorial_events');
         Schema::table('article_translations', fn (Blueprint $table) => $table->dropColumn('image_alt'));
         Schema::table('articles', fn (Blueprint $table) => $table->dropColumn('image_credit'));
-        Schema::table('users', fn (Blueprint $table) => $table->dropColumn('is_editor'));
+        Schema::table('users', function (Blueprint $table): void {
+            $table->dropIndex('users_is_editor_index');
+            $table->dropColumn('is_editor');
+        });
     }
 };

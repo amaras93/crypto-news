@@ -4,6 +4,8 @@ CryptoNews is a multilingual financial newspaper with a protected editorial CMS,
 
 Phase 11 verification: **829 tests / 17,358 assertions**, zero failures/errors/skips, passing Pint, Composer validation, production asset build and Blade compilation. Production configuration/route caching passed in isolated fixture paths. All original rows in 42 business tables and the local `.env`/dependency lockfiles are unchanged. **Deployment remains BLOCKED** by MySQL 8 integration/restore, real browser QA and production infrastructure verification. The browser bridge failed before rendering a page; no screenshots or Core Web Vitals were verified. An unpatched picomatch advisory affects build/dev dependencies; production npm dependencies and locked Composer dependencies report no advisories. See the report for evidence, severity and release gates.
 
+The subsequent [MariaDB 10.11 compatibility correction and staging recovery guide](docs/PRODUCTION_RUNBOOK.md#mariadb-1011-migration-compatibility-and-empty-staging-recovery) replaces one 66-character generated index name with `csr_candidate_source_index` and fixes indexed-column rollback cleanup. All 13 migrations were exercised on a disposable MariaDB 10.11.6 server, including standard Artisan migration/rollback/reapplication. With the optional real MariaDB regression enabled, **833 tests / 17,410 assertions** pass with no skips. Do not blindly retry a partially applied migration: use the guide's separate, initially empty staging database. Real MySQL 8 execution and the other production release gates remain outstanding.
+
 ## Installed stack
 
 | Component | Verified version |

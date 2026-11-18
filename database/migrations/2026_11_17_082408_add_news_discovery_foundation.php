@@ -108,7 +108,7 @@ return new class extends Migration
             $table->timestamp('last_seen_at');
             $table->timestamps();
             $table->unique(['news_source_id', 'external_hash'], 'candidate_source_external_unique');
-            $table->index(['news_candidate_id', 'news_source_id']);
+            $table->index(['news_candidate_id', 'news_source_id'], 'csr_candidate_source_index');
         });
         Schema::create('candidate_reviews', function (Blueprint $table): void {
             $table->id();

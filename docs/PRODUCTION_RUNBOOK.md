@@ -188,3 +188,160 @@ Emergency controls: keep `AI_EMERGENCY_STOP=true` and all generation flags off; 
 - Advertising: reviewed advertisers/creative/destinations and regional financial-ad requirements; approved AdSense account/publisher/seller records if chosen; a genuine applicable certified CMP and tested consent/refusal/withdrawal flow. Phase 11 makes no Google approval, CMP certification or legal-compliance claim.
 
 Phase 11 stops at documented implementation and local verification. Provisioning, deployment, provider purchases, real messages, integration activation and Phase 12 require a new instruction.
+
+## MariaDB 10.11 migration compatibility and empty-staging recovery
+
+Compatibility correction, 2026-11-18. This section addresses SQLSTATE 42000 / error 1059 from `2026_11_17_082408_add_news_discovery_foundation` and supersedes the historical lack of MariaDB DDL execution evidence for this specific correction. It does not authorize production deployment or change the other readiness gates.
+
+### Correction and verification scope
+
+All 13 migration files were inspected and their complete `up`/reverse-order `down` statements compiled through the installed Laravel 13 MariaDB and MySQL grammars. One generated identifier exceeded the 64-character limit:
+
+| Old generated name | Length | Explicit replacement | Length |
+| --- | --- | --- | --- |
+| `candidate_source_references_news_candidate_id_news_source_id_index` | 66 | `csr_candidate_source_index` | 26 |
+
+The replacement remains a non-unique index on `(news_candidate_id, news_source_id)`, with unchanged column order. Columns, relationships, other forward indexes and application behavior are preserved. The discovery migration's rollback drops the owning table, so the renamed index needs no separate name-based drop. Other rollback references were checked against the constraints actually created.
+
+Full rollback testing also exposed existing SQLite errors when indexed columns were dropped before their indexes. The editorial-user, community, AI and sponsorship `down()` methods now drop the affected indexes explicitly before dropping columns. The AI candidate foreign key is removed before its unique index and column. Those constraint/index names are unchanged; the array-based foreign-key drop preserves SQLite compatibility and generates the same named MariaDB/MySQL constraint. No new migration or data backfill is introduced. Already-applied databases are not automatically renamed or modified by editing these historical migration files.
+
+`tests/Feature/MigrationIdentifierTest.php` provides:
+
+- Complete-chain SQL identifier checks for MariaDB 10.11.6 and MySQL 8.0, including generated indexes, unique constraints and foreign keys, plus matching name-based foreign-key rollback references. PDO execution is forbidden in these compilation tests.
+- An actual isolated in-memory SQLite migration/rollback/reapply/final-rollback check, including the index's name, column order, non-unique property and foreign-key preservation.
+- An optional real local MariaDB/MySQL test, requiring an explicitly named `cryptonews_migration_test_*` empty database and loopback host. It refuses existing tables and never wipes them. Without `CRYPTONEWS_MIGRATION_TEST_CONFIG`, only this optional integration case is skipped.
+
+Real MariaDB **10.11.6** execution passed all 13 migrations, full rollback, reapplication and final rollback on a separately initialized, loopback-only disposable server. The official archive's SHA-256 was verified; no Windows service or application dependency was installed. The test also reproduced error **1059**, proved that the table survives the failed index, and proved that a blind corrected rerun fails with error **1050** (table already exists). Only deliberately created fixture tables were cleaned up; production was never contacted. The broader application suite continues to use isolated SQLite; this is not a claim that all feature/data/concurrency workflows ran on MariaDB. MySQL 8 SQL compilation passed, but a real MySQL 8 server was not used.
+
+Verification completed with **833 tests / 17,410 assertions**, zero failures/errors/skips, with the real MariaDB integration case enabled. Pint passed. On another newly created disposable MariaDB database, standard Artisan `migrate`, `migrate:status`, `migrate:rollback --step=13`, `migrate` and `migrate:status` also exited successfully; all 13 migrations showed `Ran` after reapplication. The local `.env`, local SQLite database, dependency manifests and lockfiles remained unchanged. No frontend code changed, so a frontend build was not required for this database-only correction.
+
+MariaDB documents the [64-character identifier limits](https://mariadb.com/docs/server/reference/sql-structure/sql-language-structure/identifier-names) and [implicit commits for DDL](https://mariadb.com/docs/server/reference/sql-statements/transactions/sql-statements-that-cause-an-implicit-commit). MySQL documents the corresponding [identifier limits](https://dev.mysql.com/doc/refman/8.0/en/identifier-length.html). Laravel allows explicit [index names](https://laravel.com/framework/docs/13.x/migrations#creating-indexes).
+
+### Why an ordinary retry or rollback is unsafe
+
+Laravel logs a migration as complete only after its `up()` succeeds. MariaDB can retain earlier CREATE TABLE/ALTER TABLE statements when a later index fails. Consequently, the failed discovery migration may be absent from the `migrations` table even though some of its tables exist, and `migrate:rollback` can target the preceding successful batch instead. Editing the index name neither removes those residual tables nor repairs their definitions.
+
+Do not rerun against that partial schema, insert a fabricated successful migration-history row, suppress the error with table-exists checks, disable foreign-key checks or perform a blanket rollback. For any database that may contain valuable data, preserve a consistent backup and obtain an instance-specific repair plan based on the actual schema/history. No production repair SQL was run or assumed here.
+
+### Exact safe procedure: a new, initially empty staging database
+
+Use a **separate staging checkout and a newly created database**. Leave the VPS's existing database, its partial tables and its `.env` untouched. The explicit names below are dedicated examples; if either already exists, choose another unused name. The CREATE statements intentionally omit `IF NOT EXISTS`, so accidental reuse fails instead of proceeding.
+
+1. On the MariaDB host, an authorized database administrator creates the dedicated staging database/user. Open the client interactively (`mariadb -u <database-administrator> -p`) and run the following, replacing the quoted password placeholder with a new staging-only secret. Never paste real credentials into Git, tickets or chat. Match the account host to `DB_HOST`; this example uses local TCP.
+
+```sql
+SELECT VERSION();
+CREATE DATABASE cryptonews_staging_recovery_20261118
+    CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'cryptonews_staging_20261118'@'127.0.0.1'
+    IDENTIFIED BY 'REPLACE_WITH_A_NEW_STAGING_ONLY_SECRET';
+GRANT ALL PRIVILEGES ON cryptonews_staging_recovery_20261118.*
+    TO 'cryptonews_staging_20261118'@'127.0.0.1';
+```
+
+2. Use a **new directory** accessible to the staging operator. The `/srv/cryptonews-staging-recovery-20261118` path below is an example, not the production path. Authenticate Git with the operator's existing secure GitHub/deploy-key mechanism; do not put a token into the clone URL. If the destination exists, stop and choose a fresh directory.
+
+```bash
+git clone --branch main --single-branch git@github.com:amaras93/crypto-news.git /srv/cryptonews-staging-recovery-20261118
+cd /srv/cryptonews-staging-recovery-20261118
+git log -1 --oneline
+composer install --prefer-dist --no-interaction
+install -m 600 .env.example .env
+```
+
+Confirm this checkout contains the explicit `csr_candidate_source_index` correction before continuing. Do not copy an existing production `.env` or production configuration cache. The new staging file must contain only staging credentials and all existing integration shutdown defaults. Set these values using a secure editor:
+
+```dotenv
+APP_ENV=staging
+APP_DEBUG=false
+APP_URL=http://127.0.0.1
+DB_CONNECTION=mariadb
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=cryptonews_staging_recovery_20261118
+DB_USERNAME=cryptonews_staging_20261118
+DB_PASSWORD= # Set the new staging-only password securely here.
+DB_CHARSET=utf8mb4
+DB_COLLATION=utf8mb4_unicode_ci
+CACHE_STORE=database
+SESSION_DRIVER=database
+QUEUE_CONNECTION=database
+MAIL_MAILER=log
+MARKET_DATA_MODE=demo
+MARKET_DATA_RIGHTS_CONFIRMED=false
+AI_EMERGENCY_STOP=true
+AI_CANDIDATE_PROCESSING_ENABLED=false
+AI_GENERATION_ENABLED=false
+AI_TRANSLATION_ENABLED=false
+AI_SCHEDULED_GENERATION_ENABLED=false
+NEWSLETTERS_ENABLED=false
+PRICE_ALERTS_ENABLED=false
+ENGAGEMENT_REAL_EMAIL_ENABLED=false
+ADVERTISING_ENABLED=false
+DIRECT_ADVERTISING_ENABLED=false
+ADVERTISING_MODE=disabled
+ADSENSE_ENABLED=false
+```
+
+Also ensure `DB_URL` is unset: a supplied database URL can override the separate connection fields. Keep API keys/publisher IDs empty, discovery disabled and workers/scheduler stopped. Do not expose this migration-test checkout as a public site. The installed application supports both `mysql` and `mariadb` drivers; these instructions explicitly choose its MariaDB connection.
+
+3. Using the **staging account**, confirm the selected database name, server version and absence of tables. The password prompt must remain interactive:
+
+```bash
+mariadb --protocol=TCP --host=127.0.0.1 --port=3306 --user=cryptonews_staging_20261118 --password cryptonews_staging_recovery_20261118
+```
+
+```sql
+SELECT DATABASE(), VERSION();
+SELECT COUNT(*) AS existing_tables
+FROM information_schema.tables
+WHERE table_schema = DATABASE();
+```
+
+Require the exact new database name and `existing_tables = 0`. If any table exists, stop; do not wipe it. Exit the SQL client. Check that no externally exported `DB_URL`/`DB_*`/`APP_CONFIG_CACHE` variables override the staging file, and inspect the effective non-secret Laravel settings:
+
+```bash
+php artisan config:clear --no-interaction
+php artisan config:show database.default --no-interaction
+php artisan config:show database.connections.mariadb.host --no-interaction
+php artisan config:show database.connections.mariadb.database --no-interaction
+```
+
+Do not dump the entire database configuration, which contains credentials. An exported `APP_CONFIG_CACHE` must not point at the production artifact; resolve that before any cache command.
+
+4. Only in this **new checkout with its new empty database and blank APP_KEY**, generate a staging-only key and run the normal migration command. This does not rotate the existing application's key.
+
+```bash
+php artisan key:generate --no-interaction
+php artisan migrate --force --no-interaction
+php artisan migrate:status --no-interaction
+```
+
+Require all 13 current migrations to show `Ran`, including discovery, AI, engagement, exact-price preservation and advertising. Do not run seeders, queue workers, scheduler or integration refresh commands for this verification.
+
+5. Reconnect to the dedicated staging database and verify the actual index/constraints. `SHOW INDEX` should show two rows under `csr_candidate_source_index`, in order `news_candidate_id`, `news_source_id`, with `Non_unique = 1`.
+
+```sql
+SHOW INDEX FROM candidate_source_references;
+SHOW CREATE TABLE candidate_source_references;
+SELECT COUNT(*) AS overlong_index_names
+FROM information_schema.statistics
+WHERE table_schema = DATABASE() AND CHAR_LENGTH(index_name) > 64;
+SELECT COUNT(*) AS overlong_constraint_names
+FROM information_schema.table_constraints
+WHERE constraint_schema = DATABASE() AND CHAR_LENGTH(constraint_name) > 64;
+```
+
+Both overlong-name counts must be zero. Record the deployed commit, MariaDB version and migration status. If a migration fails, retain that failed staging database for inspection and repeat with another newly created empty database after correcting the cause; do not blindly retry on its partial schema.
+
+No DROP DATABASE, `migrate:fresh`, production data edit, migration-history fabrication, deployment, DNS change or paid-service activation is part of this procedure.
+
+### Repeating the optional real-database regression
+
+For automated integration testing, create a **different empty test database** named `cryptonews_migration_test_<unique_suffix>` with a user restricted to it. Put its credentials in an ignored, access-restricted local JSON file with fields `driver` (`mariadb` or `mysql`), `host` (`127.0.0.1`), `port`, `database`, `username` and `password`. Never point this at the populated staging application database. With PHP/PDO MySQL and dev dependencies installed:
+
+```bash
+CRYPTONEWS_MIGRATION_TEST_CONFIG=/secure/path/to/test-connection.json php artisan test --compact tests/Feature/MigrationIdentifierTest.php --no-interaction
+```
+
+The real-server case intentionally reproduces a failing overlong index on its own fixture table, confirms that a blind rerun is unsafe, removes only that test-owned partial table, then runs the entire up/down/up/down chain. It refuses a nonempty target before making changes, and leaves the dedicated test schema empty on success. Retain any failed test schema for diagnosis rather than dropping unknown tables automatically. Source-compilation and SQLite coverage do not require this JSON or a server.

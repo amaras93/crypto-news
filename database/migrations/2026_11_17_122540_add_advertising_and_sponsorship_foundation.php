@@ -107,6 +107,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('articles', function (Blueprint $table): void {
+            $table->dropIndex('articles_sponsor_classification_index');
             $table->dropConstrainedForeignId('sponsor_id');
             $table->dropConstrainedForeignId('sponsorship_reviewed_by');
             $table->dropColumn(['sponsor_classification', 'sponsorship_disclosures', 'sponsorship_reviewed_at', 'sponsorship_review_hash']);

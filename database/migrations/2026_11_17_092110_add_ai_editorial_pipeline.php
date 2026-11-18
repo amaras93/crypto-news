@@ -136,12 +136,15 @@ return new class extends Migration
     {
         Schema::dropIfExists('ai_editorial_reviews');
         Schema::table('article_translations', function (Blueprint $table): void {
+            $table->dropIndex('article_translations_ai_review_status_index');
             $table->dropConstrainedForeignId('ai_run_id');
             $table->dropConstrainedForeignId('ai_reviewed_by');
             $table->dropColumn(['ai_generated_hash', 'ai_review_hash', 'ai_review_status', 'ai_reviewed_at', 'ai_human_edited_at']);
         });
         Schema::table('articles', function (Blueprint $table): void {
-            $table->dropConstrainedForeignId('ai_candidate_id');
+            $table->dropForeign(['ai_candidate_id']);
+            $table->dropUnique('articles_ai_candidate_id_unique');
+            $table->dropColumn('ai_candidate_id');
             $table->dropConstrainedForeignId('ai_generation_run_id');
             $table->dropColumn('ai_simulated');
         });
