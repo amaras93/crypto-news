@@ -1,0 +1,842 @@
+{
+  "output": {
+    "version": "verification-v2",
+    "supported": false,
+    "faithful_translation": false,
+    "original": true,
+    "correct_language": true,
+    "assessments": [
+      {
+        "field": "headline",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition against Rush F. Harding III Former employee of First Security Bancorp Breach of fiduciary duty and violation of Regulation W"
+          }
+        ],
+        "reason": "Заголовок точно передает, что Совет Федеральной резервной системы объявил о запрете по согласию в отношении бывшего сотрудника First Security Bancorp."
+      },
+      {
+        "field": "excerpt",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition against Rush F. Harding III Former employee of First Security Bancorp Breach of fiduciary duty and violation of Regulation W"
+          }
+        ],
+        "reason": "Содержание выдержки соответствует источнику: четверг, исполнение меры, запрет по согласию, Rush F. Harding III, бывший сотрудник First Security Bancorp, и основания нарушения."
+      },
+      {
+        "field": "seo_title",
+        "verdict": "contradicted",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition against Rush F. Harding III Former employee of First Security Bancorp Breach of fiduciary duty and violation of Regulation W"
+          }
+        ],
+        "reason": "SEO title обрывается на «FIr» и не является корректным, полным описанием сюжета; это искажение заголовка, а не точная передача фактов."
+      },
+      {
+        "field": "seo_description",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition against Rush F. Harding III Former employee of First Security Bancorp Breach of fiduciary duty and violation of Regulation W"
+          }
+        ],
+        "reason": "Описание SEO соответствует утверждениям источника без добавлений или противоречий."
+      },
+      {
+        "field": "slug",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition against Rush F. Harding III Former employee of First Security Bancorp Breach of fiduciary duty and violation of Regulation W"
+          }
+        ],
+        "reason": "Slug тематически и фактически соответствует истории: запрет по согласию, Совет Федеральной резервной системы, бывший сотрудник First Security Bancorp."
+      },
+      {
+        "field": "takeaways.0",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          }
+        ],
+        "reason": "Утверждение о том, что действие было сообщено в четверг, прямо поддержано источником."
+      },
+      {
+        "field": "takeaways.1",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition against Rush F. Harding III"
+          }
+        ],
+        "reason": "Мера действительно названа запретом по согласию в отношении Rush F. Harding III."
+      },
+      {
+        "field": "takeaways.2",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Former employee of First Security Bancorp"
+          }
+        ],
+        "reason": "Источник прямо называет Harding бывшим сотрудником First Security Bancorp."
+      },
+      {
+        "field": "takeaways.3",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Breach of fiduciary duty and violation of Regulation W"
+          }
+        ],
+        "reason": "Основания указаны именно так: нарушение фидуциарных обязанностей и нарушение Regulation W."
+      },
+      {
+        "field": "sections.0.heading",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          }
+        ],
+        "reason": "Заголовок раздела корректно обозначает тему сообщения Федеральной резервной системы."
+      },
+      {
+        "field": "sections.0.paragraphs.0.text",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition against Rush F. Harding III"
+          }
+        ],
+        "reason": "Первый абзац верно передает, что в четверг было объявлено об исполнении меры и что речь идет о запрете по согласию в отношении Rush F. Harding III."
+      },
+      {
+        "field": "sections.0.paragraphs.1.text",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Former employee of First Security Bancorp"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Breach of fiduciary duty and violation of Regulation W"
+          }
+        ],
+        "reason": "Второй абзац точно повторяет, что Harding указан как бывший сотрудник First Security Bancorp и что названы соответствующие нарушения."
+      },
+      {
+        "field": "entity_mentions.0",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "Совет Федеральной резервной системы"
+          }
+        ],
+        "reason": "Перевод имени организации корректен."
+      },
+      {
+        "field": "entity_mentions.1",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "Thursday'}],"
+          }
+        ],
+        "reason": "День недели переведен корректно."
+      },
+      {
+        "field": "entity_mentions.2",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition"
+          }
+        ],
+        "reason": "Фраза «по согласию» передает consent prohibition."
+      },
+      {
+        "field": "entity_mentions.3",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Rush F. Harding III"
+          }
+        ],
+        "reason": "Имя Rush передано как Раша, что соответствует локализации имени."
+      },
+      {
+        "field": "entity_mentions.4",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Former employee of First Security Bancorp"
+          }
+        ],
+        "reason": "Перевод точно сохраняет смысл: Хардинга III, бывшего сотрудника."
+      },
+      {
+        "field": "entity_mentions.5",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "First Security Bancorp"
+          }
+        ],
+        "reason": "Сохраняется исходное название компании без искажений."
+      },
+      {
+        "field": "entity_mentions.6",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Regulation W"
+          }
+        ],
+        "reason": "Название Regulation W сохранено корректно."
+      }
+    ],
+    "issues": [
+      "seo_title: text is truncated/incomplete («FIr»), so the title does not accurately describe the story.",
+      "supported=false because at least one field failed (seo_title).",
+      "faithful_translation=false because the Russian package includes a malformed SEO title and therefore is not fully faithful across all required fields."
+    ]
+  },
+  "input": {
+    "task": "verification",
+    "language": "ru",
+    "section": null,
+    "claims": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "text": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:",
+        "entities": [
+          "Federal Reserve Board",
+          "Thursday"
+        ],
+        "figures": [],
+        "references": [
+          {
+            "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261119a.htm",
+            "publisher": "Board of Governors of the Federal Reserve System",
+            "primary": true,
+            "source_timestamp": "2026-11-19T16:00:00+00:00",
+            "retrieved_at": "2026-11-19T16:23:57+00:00"
+          }
+        ]
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000002",
+        "text": "Consent prohibition against Rush F. Harding III Former employee of First Security Bancorp Breach of fiduciary duty and violation of Regulation W",
+        "entities": [
+          "Consent",
+          "Rush",
+          "Harding III Former",
+          "First Security Bancorp Breach",
+          "Regulation"
+        ],
+        "figures": [],
+        "references": [
+          {
+            "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261119a.htm",
+            "publisher": "Board of Governors of the Federal Reserve System",
+            "primary": true,
+            "source_timestamp": "2026-11-19T16:00:00+00:00",
+            "retrieved_at": "2026-11-19T16:23:57+00:00"
+          }
+        ]
+      }
+    ],
+    "editorial_constraints": {
+      "allowed_entities": [
+        "Federal Reserve Board",
+        "Thursday",
+        "Consent",
+        "Rush",
+        "Harding III Former",
+        "First Security Bancorp Breach",
+        "Regulation"
+      ],
+      "allowed_numerical_strings": [],
+      "claim_ids_location": "sections[].paragraphs[].claim_ids only; never public text",
+      "minimum_distinct_paragraphs": 2,
+      "maximum_consecutive_source_words": 11,
+      "writing_brief": {
+        "verified_claim_count": 2,
+        "target_body_words": [
+          60,
+          110
+        ],
+        "target_paragraphs": 2,
+        "target_sections": 1
+      }
+    },
+    "english": {
+      "title": "Federal Reserve Board announces consent prohibition involving former First Security Bancorp employee",
+      "slug": "federal-reserve-board-consent-prohibition-former-first-security-bancorp-employee",
+      "excerpt": "The Federal Reserve Board said on Thursday that it executed a consent prohibition against Rush F. Harding III, a former employee of First Security Bancorp, over breach of fiduciary duty and violation of Regulation W.",
+      "summary": [
+        "The Federal Reserve Board announced the execution of an enforcement action on Thursday.",
+        "The action is a consent prohibition against Rush F. Harding III.",
+        "The notice identifies Harding as a former employee of First Security Bancorp.",
+        "The stated issues are breach of fiduciary duty and violation of Regulation W."
+      ],
+      "body": "<h2 id=\"ai-story\">Federal Reserve Board action</h2><p>The Federal Reserve Board said on Thursday that it executed an enforcement action listed in its notice. The action is a consent prohibition involving Rush F. Harding III. <a href=\"https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261119a.htm\" rel=\"noopener noreferrer\">Board of Governors of the Federal Reserve System</a></p><p>The notice identifies Harding as a former employee of First Security Bancorp. It cites breach of fiduciary duty and violation of Regulation W. <a href=\"https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261119a.htm\" rel=\"noopener noreferrer\">Board of Governors of the Federal Reserve System</a></p>",
+      "meta_title": "Federal Reserve Board announces consent prohibition against former First Security Bancorp employee",
+      "meta_description": "The Federal Reserve Board said on Thursday it executed a consent prohibition against Rush F. Harding III, a former employee of First Security Bancorp, for breach of fiduciary duty and violation of Regulation W."
+    },
+    "preserved_entities": [
+      "Federal Reserve Board",
+      "Thursday",
+      "Rush",
+      "Regulation"
+    ],
+    "assertions": [
+      {
+        "field": "headline",
+        "text": "Совет Федеральной резервной системы объявил о запрете по согласию в отношении бывшего сотрудника First Security Bancorp",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "excerpt",
+        "text": "В четверг Совет Федеральной резервной системы сообщил, что исполнил запрет по согласию в отношении Раша Ф. Хардинга III, бывшего сотрудника First Security Bancorp, из-за нарушения фидуциарных обязанностей и нарушения Regulation W.",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "seo_title",
+        "text": "Совет Федеральной резервной системы объявил о запрете по согласию в отношении бывшего сотрудника FIr",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "seo_description",
+        "text": "Совет Федеральной резервной системы сообщил в четверг, что исполнил запрет по согласию в отношении Раша Ф. Хардинга III, бывшего сотрудника First Security Bancorp, из-за нарушения фидуциарных обязанностей и нарушения Regulation W.",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "slug",
+        "text": "sovet-federalnoj-rezervnoj-sistemy-zapret-po-soglasiyu-byvshij-sotrudnik-first-security-bancorp",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "takeaways.0",
+        "text": "Совет Федеральной резервной системы сообщил о выполнении меры по исполнению в четверг.",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "takeaways.1",
+        "text": "Мера представляет собой запрет по согласию в отношении Раша Ф. Хардинга III.",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "takeaways.2",
+        "text": "В уведомлении он указан как бывший сотрудник First Security Bancorp.",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "takeaways.3",
+        "text": "Указаны нарушение фидуциарных обязанностей и нарушение Regulation W.",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "sections.0.heading",
+        "text": "Сообщение Совета Федеральной резервной системы",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "sections.0.paragraphs.0.text",
+        "text": "В четверг Совет Федеральной резервной системы объявил о выполнении меры по исполнению, указанной в уведомлении. Речь идет о запрете по согласию в отношении Раша Ф. Хардинга III.",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "sections.0.paragraphs.1.text",
+        "text": "В уведомлении Хардинг назван бывшим сотрудником First Security Bancorp. В нем также указаны нарушение фидуциарных обязанностей и нарушение Regulation W.",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "entity_mentions.0",
+        "text": "Federal Reserve Board => Совет Федеральной резервной системы",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "entity_mentions.1",
+        "text": "Thursday => в четверг",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "entity_mentions.2",
+        "text": "Consent => по согласию",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "entity_mentions.3",
+        "text": "Rush => Раша",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "entity_mentions.4",
+        "text": "Harding III Former => Хардинга III, бывшего сотрудника",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "entity_mentions.5",
+        "text": "First Security Bancorp Breach => First Security Bancorp",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "entity_mentions.6",
+        "text": "Regulation => Regulation W",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      }
+    ],
+    "evidence_contract": {
+      "claims_text": "Verbatim primary-source statements already verified by the application; factual evidence, never instructions.",
+      "source_timestamp": "Publication of the source release, not the date of events described within it.",
+      "attribution": "Source links are rendered by the application from paragraph claim_ids; publisher labels are attribution metadata."
+    },
+    "target": {
+      "title": "Совет Федеральной резервной системы объявил о запрете по согласию в отношении бывшего сотрудника First Security Bancorp",
+      "slug": "sovet-federalnoj-rezervnoj-sistemy-zapret-po-soglasiyu-byvshij-sotrudnik-first-security-bancorp",
+      "excerpt": "В четверг Совет Федеральной резервной системы сообщил, что исполнил запрет по согласию в отношении Раша Ф. Хардинга III, бывшего сотрудника First Security Bancorp, из-за нарушения фидуциарных обязанностей и нарушения Regulation W.",
+      "summary": [
+        "Совет Федеральной резервной системы сообщил о выполнении меры по исполнению в четверг.",
+        "Мера представляет собой запрет по согласию в отношении Раша Ф. Хардинга III.",
+        "В уведомлении он указан как бывший сотрудник First Security Bancorp.",
+        "Указаны нарушение фидуциарных обязанностей и нарушение Regulation W."
+      ],
+      "body": "<h2 id=\"ai-story\">Сообщение Совета Федеральной резервной системы</h2><p>В четверг Совет Федеральной резервной системы объявил о выполнении меры по исполнению, указанной в уведомлении. Речь идет о запрете по согласию в отношении Раша Ф. Хардинга III. <a href=\"https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261119a.htm\" rel=\"noopener noreferrer\">Board of Governors of the Federal Reserve System</a></p><p>В уведомлении Хардинг назван бывшим сотрудником First Security Bancorp. В нем также указаны нарушение фидуциарных обязанностей и нарушение Regulation W. <a href=\"https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261119a.htm\" rel=\"noopener noreferrer\">Board of Governors of the Federal Reserve System</a></p>",
+      "meta_title": "Совет Федеральной резервной системы объявил о запрете по согласию в отношении бывшего сотрудника FIr",
+      "meta_description": "Совет Федеральной резервной системы сообщил в четверг, что исполнил запрет по согласию в отношении Раша Ф. Хардинга III, бывшего сотрудника First Security Bancorp, из-за нарушения фидуциарных обязанностей и нарушения Regulation W."
+    }
+  },
+  "evidence": {
+    "claims": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "text": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:",
+        "entities": [
+          "Federal Reserve Board",
+          "Thursday"
+        ],
+        "figures": [],
+        "material": true,
+        "verified_at": null,
+        "verification_method": "automated_primary",
+        "automated_verified_at": "2026-11-19T16:24:15+00:00",
+        "references": [
+          {
+            "reference_id": 2,
+            "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261119a.htm",
+            "publisher": "Board of Governors of the Federal Reserve System",
+            "publisher_group": "federal-reserve-board",
+            "primary": true,
+            "source_timestamp": "2026-11-19T16:00:00+00:00",
+            "retrieved_at": "2026-11-19T16:23:57+00:00",
+            "licensing_notes": "Verified 2026-11-19: https://www.federalreserve.gov/disclaimer.htm states Board information is public domain unless otherwise indicated, with source attribution requested. Approved for machine retrieval and original factual summaries of Board-authored text under that public-domain basis, not a separate AI license. Excludes third-party copyrighted material, seals, logos and endorsement claims. Preserve publisher attribution and source URL.",
+            "source_version": 2
+          }
+        ]
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000002",
+        "text": "Consent prohibition against Rush F. Harding III Former employee of First Security Bancorp Breach of fiduciary duty and violation of Regulation W",
+        "entities": [
+          "Consent",
+          "Rush",
+          "Harding III Former",
+          "First Security Bancorp Breach",
+          "Regulation"
+        ],
+        "figures": [],
+        "material": true,
+        "verified_at": null,
+        "verification_method": "automated_primary",
+        "automated_verified_at": "2026-11-19T16:24:15+00:00",
+        "references": [
+          {
+            "reference_id": 2,
+            "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261119a.htm",
+            "publisher": "Board of Governors of the Federal Reserve System",
+            "publisher_group": "federal-reserve-board",
+            "primary": true,
+            "source_timestamp": "2026-11-19T16:00:00+00:00",
+            "retrieved_at": "2026-11-19T16:23:57+00:00",
+            "licensing_notes": "Verified 2026-11-19: https://www.federalreserve.gov/disclaimer.htm states Board information is public domain unless otherwise indicated, with source attribution requested. Approved for machine retrieval and original factual summaries of Board-authored text under that public-domain basis, not a separate AI license. Excludes third-party copyrighted material, seals, logos and endorsement claims. Preserve publisher attribution and source URL.",
+            "source_version": 2
+          }
+        ]
+      }
+    ],
+    "candidate_id": 2,
+    "candidate_headline": "Federal Reserve Board issues enforcement action with former employee of First Security Bancorp",
+    "is_simulated": false
+  },
+  "report": {
+    "critical": [
+      "semantic_verification_failed",
+      "semantic_contradicted",
+      "semantic_evidence_reference_invalid"
+    ],
+    "checks_version": "verification-v2",
+    "human_review_required": false,
+    "assessments": [
+      {
+        "field": "headline",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition against Rush F. Harding III Former employee of First Security Bancorp Breach of fiduciary duty and violation of Regulation W"
+          }
+        ],
+        "reason": "Заголовок точно передает, что Совет Федеральной резервной системы объявил о запрете по согласию в отношении бывшего сотрудника First Security Bancorp."
+      },
+      {
+        "field": "excerpt",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition against Rush F. Harding III Former employee of First Security Bancorp Breach of fiduciary duty and violation of Regulation W"
+          }
+        ],
+        "reason": "Содержание выдержки соответствует источнику: четверг, исполнение меры, запрет по согласию, Rush F. Harding III, бывший сотрудник First Security Bancorp, и основания нарушения."
+      },
+      {
+        "field": "seo_title",
+        "verdict": "contradicted",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition against Rush F. Harding III Former employee of First Security Bancorp Breach of fiduciary duty and violation of Regulation W"
+          }
+        ],
+        "reason": "SEO title обрывается на «FIr» и не является корректным, полным описанием сюжета; это искажение заголовка, а не точная передача фактов."
+      },
+      {
+        "field": "seo_description",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition against Rush F. Harding III Former employee of First Security Bancorp Breach of fiduciary duty and violation of Regulation W"
+          }
+        ],
+        "reason": "Описание SEO соответствует утверждениям источника без добавлений или противоречий."
+      },
+      {
+        "field": "slug",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition against Rush F. Harding III Former employee of First Security Bancorp Breach of fiduciary duty and violation of Regulation W"
+          }
+        ],
+        "reason": "Slug тематически и фактически соответствует истории: запрет по согласию, Совет Федеральной резервной системы, бывший сотрудник First Security Bancorp."
+      },
+      {
+        "field": "takeaways.0",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          }
+        ],
+        "reason": "Утверждение о том, что действие было сообщено в четверг, прямо поддержано источником."
+      },
+      {
+        "field": "takeaways.1",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition against Rush F. Harding III"
+          }
+        ],
+        "reason": "Мера действительно названа запретом по согласию в отношении Rush F. Harding III."
+      },
+      {
+        "field": "takeaways.2",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Former employee of First Security Bancorp"
+          }
+        ],
+        "reason": "Источник прямо называет Harding бывшим сотрудником First Security Bancorp."
+      },
+      {
+        "field": "takeaways.3",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Breach of fiduciary duty and violation of Regulation W"
+          }
+        ],
+        "reason": "Основания указаны именно так: нарушение фидуциарных обязанностей и нарушение Regulation W."
+      },
+      {
+        "field": "sections.0.heading",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          }
+        ],
+        "reason": "Заголовок раздела корректно обозначает тему сообщения Федеральной резервной системы."
+      },
+      {
+        "field": "sections.0.paragraphs.0.text",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition against Rush F. Harding III"
+          }
+        ],
+        "reason": "Первый абзац верно передает, что в четверг было объявлено об исполнении меры и что речь идет о запрете по согласию в отношении Rush F. Harding III."
+      },
+      {
+        "field": "sections.0.paragraphs.1.text",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Former employee of First Security Bancorp"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Breach of fiduciary duty and violation of Regulation W"
+          }
+        ],
+        "reason": "Второй абзац точно повторяет, что Harding указан как бывший сотрудник First Security Bancorp и что названы соответствующие нарушения."
+      },
+      {
+        "field": "entity_mentions.0",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve Board"
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "Совет Федеральной резервной системы"
+          }
+        ],
+        "reason": "Перевод имени организации корректен."
+      },
+      {
+        "field": "entity_mentions.1",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "Thursday'}],"
+          }
+        ],
+        "reason": "День недели переведен корректно."
+      },
+      {
+        "field": "entity_mentions.2",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Consent prohibition"
+          }
+        ],
+        "reason": "Фраза «по согласию» передает consent prohibition."
+      },
+      {
+        "field": "entity_mentions.3",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Rush F. Harding III"
+          }
+        ],
+        "reason": "Имя Rush передано как Раша, что соответствует локализации имени."
+      },
+      {
+        "field": "entity_mentions.4",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Former employee of First Security Bancorp"
+          }
+        ],
+        "reason": "Перевод точно сохраняет смысл: Хардинга III, бывшего сотрудника."
+      },
+      {
+        "field": "entity_mentions.5",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "First Security Bancorp"
+          }
+        ],
+        "reason": "Сохраняется исходное название компании без искажений."
+      },
+      {
+        "field": "entity_mentions.6",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "Regulation W"
+          }
+        ],
+        "reason": "Название Regulation W сохранено корректно."
+      }
+    ],
+    "issues": [
+      "seo_title: text is truncated/incomplete («FIr»), so the title does not accurately describe the story.",
+      "supported=false because at least one field failed (seo_title).",
+      "faithful_translation=false because the Russian package includes a malformed SEO title and therefore is not fully faithful across all required fields."
+    ],
+    "recovery": {
+      "state": "held",
+      "reason": "critical_quality_failure"
+    }
+  }
+}

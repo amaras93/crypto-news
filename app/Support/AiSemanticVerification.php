@@ -70,6 +70,21 @@ class AiSemanticVerification
         ])->validate();
     }
 
+    public function metadataOnlyFailure(AiGenerationRun $run): bool
+    {
+        if ($run->locale === 'en' || $run->schema_version !== 'verification-v2') {
+            return false;
+        }
+        $assessments = collect($run->output_document['assessments'] ?? []);
+        $expected = collect($run->input_payload['assertions'] ?? [])->pluck('field')->sort()->values()->all();
+        if ($expected === [] || $expected !== $assessments->pluck('field')->sort()->values()->all()) {
+            return false;
+        }
+        $failed = $assessments->where('verdict', '!=', 'supported')->pluck('field')->all();
+
+        return $failed !== [] && array_diff($failed, ['seo_title', 'seo_description', 'slug']) === [];
+    }
+
     public function failureContext(array $document, array $report): array
     {
         return ['checks' => Arr::only($document, ['version', 'supported', 'faithful_translation', 'original', 'correct_language', 'issues']),

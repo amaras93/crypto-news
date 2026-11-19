@@ -14,8 +14,9 @@ class AiRecovery
     {
         $inconsistent = $run->task === 'verification' && $run->schema_version === 'verification-v2'
             && app(AiSemanticVerification::class)->inconsistent($run->output_document ?? []);
+        $metadataFailure = $run->task === 'verification' && app(AiSemanticVerification::class)->metadataOnlyFailure($run);
         $formatWarning = $run->task === 'translation' && ($run->quality_report['critical'] ?? []) === ['model_reported_unsupported_claims'];
-        if (! $inconsistent && ! $formatWarning && ($run->quality_report['recovery']['state'] ?? null) === 'held' && ($run->quality_report['recovery']['reason'] ?? null) !== 'recovery_budget_unavailable') {
+        if (! $inconsistent && ! $formatWarning && ! $metadataFailure && ($run->quality_report['recovery']['state'] ?? null) === 'held' && ($run->quality_report['recovery']['reason'] ?? null) !== 'recovery_budget_unavailable') {
             return null;
         }
         if (! $run->is_automated || $run->is_simulated || $run->children()->exists()
@@ -40,6 +41,10 @@ class AiRecovery
         if ($run->task === 'verification') {
             if ($run->schema_version === 'verification-v1') {
                 return $critical === ['semantic_verification_failed'] ? 'legacy_verification' : null;
+            }
+            if ($metadataFailure) {
+                return AiGenerationRun::where('article_id', $run->article_id)->where('locale', $run->locale)
+                    ->where('task', 'translation')->whereNotNull('parent_run_id')->count() < 2 ? 'translation_correction' : null;
             }
             if (array_intersect($critical, ['semantic_contradicted', 'semantic_absent']) !== []) {
                 return null;

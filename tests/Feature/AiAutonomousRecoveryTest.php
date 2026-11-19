@@ -539,4 +539,58 @@ class AiAutonomousRecoveryTest extends AiTestCase
         $this->assertStringContainsString('Regulation W', $fixture['output']['unsupported_claim_warnings'][0]);
         Http::assertNothingSent();
     }
+
+    public function test_metadata_only_failure_is_repaired_without_accepting_the_rejected_package(): void
+    {
+        $english = $this->english();
+        $this->verifyEnglish($english);
+        $translation = app(AiDrafting::class)->translate($this->admin, $english->article->fresh(), ['ru'], dispatch: false)[0];
+        $this->mockStages();
+        $this->complete($translation);
+        $verification = app(AiDrafting::class)->verify($this->admin, $english->article->fresh(), 'ru');
+        $document = $this->verifiedDocument($verification);
+        $document['supported'] = false;
+        $document['faithful_translation'] = false;
+        $document['issues'] = ['SEO title is an incomplete prefix rather than a readable title.'];
+        foreach ($document['assessments'] as &$assessment) {
+            if ($assessment['field'] === 'seo_title') {
+                $assessment['verdict'] = 'contradicted';
+            }
+        }
+        unset($assessment);
+        $this->fakeProvider($this->response($verification, $document));
+        app(AiDrafting::class)->process($verification->id, false);
+        app(AiDrafting::class)->validate($verification->id, false);
+        $this->assertSame(AiRunStatus::QualityBlocked, $verification->fresh()->status);
+        $this->assertSame('translation_correction', app(AiRecovery::class)->plan($verification->fresh()));
+        $article = $this->drain();
+        $this->assertSame(ArticleStatus::Published, $article->status);
+        $this->assertSame($document, $verification->fresh()->output_document);
+        $this->assertSame('translation', $verification->children()->sole()->task);
+        $this->assertSame(1, AiGenerationRun::where('task', 'english')->count());
+        $this->assertSame(8, $article->translations()->where('ai_review_status', 'automated')->count());
+    }
+
+    public function test_actual_failed_seo_is_still_blocking_and_correction_scope_excludes_body_contradictions(): void
+    {
+        $fixture = json_decode(file_get_contents(base_path('tests/Fixtures/rejected-federal-reserve-seo.json')), true, flags: JSON_THROW_ON_ERROR);
+        $run = new AiGenerationRun(['task' => 'verification', 'locale' => 'ru', 'evidence_snapshot' => $fixture['evidence']]);
+        $run->schema_version = 'verification-v2';
+        $run->input_payload = $fixture['input'];
+        $run->output_document = $fixture['output'];
+        $service = app(AiSemanticVerification::class);
+        $this->assertTrue($service->metadataOnlyFailure($run));
+        $this->assertContains('semantic_contradicted', $service->report($fixture['output'], $run)['critical']);
+        $this->assertContains('semantic_evidence_reference_invalid', $service->report($fixture['output'], $run)['critical']);
+        $document = $run->output_document;
+        foreach ($document['assessments'] as &$assessment) {
+            if ($assessment['field'] === 'sections.0.paragraphs.0.text') {
+                $assessment['verdict'] = 'contradicted';
+            }
+        }
+        unset($assessment);
+        $run->output_document = $document;
+        $this->assertFalse($service->metadataOnlyFailure($run));
+        Http::assertNothingSent();
+    }
 }
