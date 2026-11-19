@@ -459,7 +459,7 @@ class AiDrafting
         $payload = ['task' => $run->task, 'language' => $run->locale, 'section' => $run->section_key, 'claims' => $claims];
         if ($run->task !== 'english') {
             $english = $run->article->fresh(['translations'])->translation('en');
-            $payload['english'] = $english->only(['title', 'excerpt', 'summary', 'body', 'meta_title', 'meta_description']);
+            $payload['english'] = $english->only(['title', 'slug', 'excerpt', 'summary', 'body', 'meta_title', 'meta_description']);
             $payload['english_text'] = implode(' ', [$english->title, $english->excerpt, $english->meta_title, $english->meta_description, ...($english->summary ?? []),
                 app(ArticleContent::class)->render($english->body)['text']]);
             $payload['preserved_entities'] = array_values(array_filter(collect($claims)->flatMap(fn (array $claim): array => $claim['entities'])->unique()->all(),
@@ -467,7 +467,7 @@ class AiDrafting
         }
         if ($run->task === 'verification') {
             $target = $run->article->fresh(['translations'])->translation($run->locale);
-            $payload['target'] = $target->only(['title', 'excerpt', 'summary', 'body', 'meta_title', 'meta_description']);
+            $payload['target'] = $target->only(['title', 'slug', 'excerpt', 'summary', 'body', 'meta_title', 'meta_description']);
         }
 
         return $payload;

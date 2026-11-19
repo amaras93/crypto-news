@@ -117,6 +117,11 @@ class Article extends Model
     {
         $query->where('status', ArticleStatus::Published)
             ->where('ai_simulated', false)
+            ->where(fn (Builder $automation): Builder => $automation->whereNull('automation_status')
+                ->orWhere('automation_status', 'paused')
+                ->orWhere(fn (Builder $complete): Builder => $complete->where('automation_status', 'published')
+                    ->whereHas('translations', fn (Builder $translation): Builder => $translation
+                        ->whereIn('locale', array_keys(config('news.locales')))->publicReady(), '=', count(config('news.locales')))))
             ->where(fn (Builder $sponsorship): Builder => $sponsorship->whereNull('sponsor_classification')
                 ->orWhere(fn (Builder $paid): Builder => $paid->whereIn('sponsor_classification', ['sponsored', 'advertisement'])
                     ->whereNotNull('sponsor_id')->whereNotNull('sponsorship_review_hash')->whereNotNull('sponsorship_reviewed_at')

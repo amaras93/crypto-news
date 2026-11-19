@@ -27,6 +27,25 @@ class ArticleMedia
         return $this->urls->base().'/storage/'.implode('/', array_map('rawurlencode', explode('/', $path)));
     }
 
+    /** @return array{width: int, height: int, type: string}|null */
+    public function metadata(?string $path): ?array
+    {
+        if (! $this->resolve($path)) {
+            return null;
+        }
+        if (preg_match('#^editorial/[a-z-]+\.svg$#', $path)) {
+            $svg = file_get_contents(public_path('images/'.$path));
+            if (preg_match('/<svg\b[^>]*\bwidth="(\d+)"[^>]*\bheight="(\d+)"/', $svg, $dimensions)) {
+                return ['width' => (int) $dimensions[1], 'height' => (int) $dimensions[2], 'type' => 'image/svg+xml'];
+            }
+
+            return null;
+        }
+        $dimensions = @getimagesizefromstring(Storage::disk('public')->get($path));
+
+        return $dimensions ? ['width' => $dimensions[0], 'height' => $dimensions[1], 'type' => $dimensions['mime']] : null;
+    }
+
     public function hero(Article $article, ?string $categorySlug = null): array
     {
         $source = $this->resolve($article->featured_image);

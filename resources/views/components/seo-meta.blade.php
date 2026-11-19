@@ -24,6 +24,11 @@
 @if($seo['image'])
     <meta property="og:image" content="{{ $seo['image'] }}">
     <meta property="og:image:alt" content="{{ $seo['imageAlt'] }}">
+    @if($seo['imageMetadata'] ?? null)
+        <meta property="og:image:width" content="{{ $seo['imageMetadata']['width'] }}">
+        <meta property="og:image:height" content="{{ $seo['imageMetadata']['height'] }}">
+        <meta property="og:image:type" content="{{ $seo['imageMetadata']['type'] }}">
+    @endif
     <meta name="twitter:image" content="{{ $seo['image'] }}">
     <meta name="twitter:image:alt" content="{{ $seo['imageAlt'] }}">
 @endif

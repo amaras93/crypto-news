@@ -220,5 +220,6 @@ class AiAutomation
         foreach (array_keys(config('news.locales')) as $locale) {
             $this->assertAccepted($article, $locale);
         }
+        app(ArticleSeo::class)->assertAutomaticPublication($article);
     }
 }

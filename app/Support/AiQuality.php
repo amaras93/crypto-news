@@ -16,6 +16,11 @@ class AiQuality
         if ($run->is_automated) {
             $report['human_review_required'] = false;
             $report['warnings'] = ['Separate automated semantic verification is required before this content can be published.'];
+            $translation = new ArticleTranslation(['article_id' => $run->article_id, 'locale' => $run->locale,
+                'title' => $document['headline'], 'slug' => $document['slug'], 'meta_title' => $document['seo_title'],
+                'meta_description' => $document['seo_description'],
+                'body' => app(AiOutputSchema::class)->body($document, $run->evidence_snapshot)]);
+            $report['critical'] = array_merge($report['critical'], app(ArticleSeo::class)->automaticIssues($translation));
         }
         $script = match ($run->locale) {
             'ru' => '/\p{Cyrillic}/u', 'ja' => '/[\p{Hiragana}\p{Katakana}\p{Han}]/u',
@@ -70,6 +75,9 @@ class AiQuality
         $text = implode(' ', [$translation->title, $translation->excerpt ?? '', $translation->meta_title ?? '', $translation->meta_description ?? '', ...($translation->summary ?? []),
             app(ArticleContent::class)->render($translation->body)['text']]);
         $report = $this->text($text, $run->evidence_snapshot);
+        if ($run->is_automated) {
+            $report['critical'] = array_merge($report['critical'], app(ArticleSeo::class)->automaticIssues($translation));
+        }
         $allowed = collect($run->evidence_snapshot['claims'])->flatMap(fn (array $claim): array => array_column($claim['references'], 'url'))->unique()->all();
         preg_match_all('/<a\b[^>]*href="([^"]+)"/iu', $translation->body, $links);
         $cited = array_map(fn (string $url): string => html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'), $links[1]);

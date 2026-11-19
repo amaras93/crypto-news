@@ -35,7 +35,11 @@ class EditorialMediaTest extends TestCase
         $this->assertSame('A newsroom image', $article->translation('en')->image_alt);
         $this->assertSame('Photo: newsroom', $article->image_credit);
         $article = app(ArticlePublication::class)->transition($admin, $article, 'publish');
-        $this->get('/en/news/image-story')->assertOk()->assertSee('alt="A newsroom image"', false)->assertSee('Photo: newsroom');
+        $this->get('/en/news/image-story')->assertOk()->assertSee('alt="A newsroom image"', false)->assertSee('Photo: newsroom')
+            ->assertSee('property="og:image:width" content="800"', false)
+            ->assertSee('property="og:image:height" content="500"', false)
+            ->assertSee('property="og:image:type" content="image/png"', false)
+            ->assertSee('name="twitter:image:alt" content="A newsroom image"', false);
         $shared = Article::factory()->create(['featured_image' => $path]);
         app(ArticlePublication::class)->trash($admin, $article);
         Storage::disk('public')->assertExists($path);

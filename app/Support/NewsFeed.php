@@ -53,6 +53,21 @@ class NewsFeed
         $tagIds = $article->tags->whereNotIn('slug', ['cryptonews-demo', 'editors-pick'])->pluck('id');
 
         return $this->articles($locale)->whereKeyNot($article->id)
+            ->when($article->ai_generation_run_id, function (Builder $query) use ($article, $tagIds): void {
+                if (! $article->category_id && $tagIds->isEmpty()) {
+                    $query->whereRaw('1 = 0');
+
+                    return;
+                }
+                $query->where(function (Builder $related) use ($article, $tagIds): void {
+                    if ($article->category_id) {
+                        $related->where('category_id', $article->category_id);
+                    }
+                    if ($tagIds->isNotEmpty()) {
+                        $related->orWhereHas('tags', fn (Builder $tags): Builder => $tags->whereIn('tags.id', $tagIds));
+                    }
+                });
+            })
             ->withCount(['tags as shared_tags_count' => fn (Builder $query) => $query->whereIn('tags.id', $tagIds)])
             ->reorder()
             ->when($article->category_id, fn (Builder $query) => $query->orderByRaw('CASE WHEN category_id = ? THEN 1 ELSE 0 END DESC', [$article->category_id]))

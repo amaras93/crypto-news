@@ -177,11 +177,51 @@ class AutomatedPublishingTest extends AiTestCase
             $this->get($path.'/news?category='.$article->category_id)->assertOk()->assertSee($translation->title);
             $this->get($path.'/news?q=Sandbox')->assertOk()->assertSee($translation->title);
             $response = $this->get($path.'/news/'.$translation->slug)->assertOk()->assertSee('rel="canonical" href="'.$url.'"', false);
+            $document = new \DOMDocument;
+            $previous = libxml_use_internal_errors(true);
+            $document->loadHTML($response->getContent());
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
+            $xpath = new \DOMXPath($document);
+            $this->assertSame(1, $xpath->query('//h1')->length);
+            $this->assertGreaterThanOrEqual(2, $xpath->query('//*[@id="article-content"]/h2')->length);
+            $this->assertSame(0, $xpath->query('//*[@id="article-content"]//h1 | //*[@id="article-content"]//h4')->length);
+            $this->assertSame($translation->meta_title.' — CryptoNews', $xpath->evaluate('string(//title)'));
+            $this->assertSame(Str::limit($translation->meta_description, 160), $xpath->evaluate('string(//meta[@name="description"]/@content)'));
+            $this->assertSame($translation->meta_title, $xpath->evaluate('string(//meta[@property="og:title"]/@content)'));
+            $this->assertSame($translation->meta_title, $xpath->evaluate('string(//meta[@name="twitter:title"]/@content)'));
+            $this->assertSame($url, $xpath->evaluate('string(//meta[@property="og:url"]/@content)'));
+            $this->assertSame(9, $xpath->query('//head/link[@hreflang]')->length);
+            $this->assertSame(0, $xpath->query('//meta[@name="robots" and contains(@content,"noindex")]')->length);
+            $this->assertNotSame('', $xpath->evaluate('string(//figure[contains(@class,"article-hero-image")]/img/@alt)'));
+            $schema = json_decode($xpath->query('//script[@type="application/ld+json"]')->item(0)->textContent, true, flags: JSON_THROW_ON_ERROR);
+            $this->assertSame('NewsArticle', $schema['@type']);
+            $this->assertSame($url, $schema['mainEntityOfPage']['@id']);
+            $this->assertSame(config('news.language_tags.'.$translation->locale), $schema['inLanguage']);
+            $this->assertSame($article->published_at->toIso8601String(), $schema['datePublished']);
+            $this->assertSame($schema['datePublished'], $schema['dateModified']);
+            $verification = AiGenerationRun::where('article_id', $article->id)->where('task', 'verification')->where('locale', $translation->locale)->sole();
+            $this->assertSame($translation->slug, $verification->input_payload['target']['slug']);
             foreach ($article->translations as $alternate) {
                 $response->assertSee(app(PublicUrl::class)->article($alternate), false);
+                $this->assertSame(app(PublicUrl::class)->article($alternate), $xpath->evaluate('string(//head/link[@hreflang="'.config('news.language_tags.'.$alternate->locale).'"]/@href)'));
             }
             $this->assertStringContainsString($url, $sitemap);
         }
+    }
+
+    public function test_bad_automated_seo_is_blocked_before_semantic_verification_or_publication(): void
+    {
+        $run = app(AiDrafting::class)->generate($this->admin, $this->candidate, dispatch: false, automated: true);
+        $document = app(FakeAiDraftProvider::class)->fixture($run);
+        $document['seo_title'] = 'Sandbox Exchange documentation Sandbox Exchange documentation Sandbox Exchange documentation';
+        $this->fakeProvider($this->response($run, $document));
+        app(AiDrafting::class)->process($run->id, false);
+        app(AiDrafting::class)->validate($run->id, false);
+        $this->assertSame(AiRunStatus::QualityBlocked, $run->fresh()->status);
+        $this->assertContains('seo_repeated_keywords', $run->fresh()->quality_report['critical']);
+        $this->assertDatabaseCount('articles', 0);
+        $this->assertSame(0, AiGenerationRun::where('task', 'verification')->count());
     }
 
     public function test_unpublishing_and_editing_pause_automation_and_remove_public_visibility(): void

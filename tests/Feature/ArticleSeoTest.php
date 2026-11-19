@@ -40,6 +40,7 @@ class ArticleSeoTest extends TestCase
             'slug' => 'seo-story', 'title' => 'The actual headline',
             'meta_title' => 'A specific search title', 'meta_description' => 'A precise description.',
             'og_image' => 'editorial/network.svg',
+            'image_alt' => 'A geometric network illustration',
         ]);
 
         $response = $this->get('/en/news/seo-story')->assertOk();
@@ -54,6 +55,11 @@ class ArticleSeoTest extends TestCase
         $this->assertSame('A precise description.', $xpath->evaluate('string(//meta[@name="description"]/@content)'));
         $this->assertSame('summary_large_image', $xpath->evaluate('string(//meta[@name="twitter:card"]/@content)'));
         $this->assertSame('https://cryptonews.test/images/editorial/network.svg', $xpath->evaluate('string(//meta[@property="og:image"]/@content)'));
+        $this->assertSame('A geometric network illustration', $xpath->evaluate('string(//meta[@property="og:image:alt"]/@content)'));
+        $this->assertSame('A geometric network illustration', $xpath->evaluate('string(//meta[@name="twitter:image:alt"]/@content)'));
+        $this->assertSame('1200', $xpath->evaluate('string(//meta[@property="og:image:width"]/@content)'));
+        $this->assertSame('740', $xpath->evaluate('string(//meta[@property="og:image:height"]/@content)'));
+        $this->assertSame('image/svg+xml', $xpath->evaluate('string(//meta[@property="og:image:type"]/@content)'));
         $schemas = $xpath->query('//script[@type="application/ld+json"]');
         $this->assertSame(2, $schemas->length);
         $news = json_decode($schemas->item(0)->textContent, true, 512, JSON_THROW_ON_ERROR);
@@ -63,6 +69,10 @@ class ArticleSeoTest extends TestCase
         $this->assertSame($canonical, $news['mainEntityOfPage']['@id']);
         $this->assertSame($article->author->name, $news['author']['name']);
         $this->assertSame('en', $news['inLanguage']);
+        $this->assertSame('ImageObject', $news['image'][0]['@type']);
+        $this->assertSame(1200, $news['image'][0]['width']);
+        $this->assertSame(740, $news['image'][0]['height']);
+        $this->assertSame('A geometric network illustration', $news['image'][0]['caption']);
         $this->assertSame('BreadcrumbList', $breadcrumbs['@type']);
         $this->assertSame($canonical, $breadcrumbs['itemListElement'][2]['item']);
     }
