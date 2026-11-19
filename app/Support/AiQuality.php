@@ -67,6 +67,7 @@ class AiQuality
             }
         }
         $report['critical'] = array_values(array_unique($report['critical']));
+        $report['originality'] = $this->originalityPreflight($document, $run->evidence_snapshot);
 
         return $report;
     }
@@ -124,19 +125,68 @@ class AiQuality
         if (preg_match('/гарантированн\p{L}* (?:прибыль|доход)|rendement garanti|profit garanti|garantierte\p{L}* (?:gewinne|rendite)|ganancias garantizadas|rendimiento garantizado|profitto garantito|rendimento garantito|必ず儲か|利益を保証|保证收益|稳赚/ui', $text)) {
             $critical[] = 'promotional_prediction_or_prompt_injection';
         }
-        $tokens = preg_split('/\s+/u', mb_strtolower(Str::squish($text))) ?: [];
-        for ($i = 0; $i + 12 <= count($tokens); $i++) {
-            $phrase = implode(' ', array_slice($tokens, $i, 12));
-            if (str_contains(mb_strtolower(Str::squish($sourceText)), $phrase)) {
-                $critical[] = 'excessive_source_similarity';
-                break;
-            }
+        if ($this->sourceOverlaps($text, $evidence) !== []) {
+            $critical[] = 'excessive_source_similarity';
         }
 
         return ['critical' => array_values(array_unique($critical)),
             'warnings' => ['Human verification of all facts, entities, currencies, symbols, forecasts and attribution is required.',
                 'Deterministic checks are screening, not independent semantic fact verification.'],
-            'human_review_required' => true, 'checks_version' => 'quality-v2'];
+            'human_review_required' => true, 'checks_version' => 'quality-v3'];
+    }
+
+    /** @return list<string> */
+    public function sourceOverlaps(string $text, array $evidence): array
+    {
+        $source = mb_strtolower(Str::squish(implode(' ', array_column($evidence['claims'], 'text'))));
+        $tokens = preg_split('/\s+/u', mb_strtolower(Str::squish($text))) ?: [];
+        $overlaps = [];
+        for ($index = 0; $index + 12 <= count($tokens); $index++) {
+            $phrase = implode(' ', array_slice($tokens, $index, 12));
+            if (str_contains($source, $phrase)) {
+                $overlaps[] = $phrase;
+                if (count($overlaps) === 5) {
+                    break;
+                }
+            }
+        }
+
+        return array_values(array_unique($overlaps));
+    }
+
+    /** @return array{threshold_words: int, overlaps: list<array{field: string, phrase: string}>} */
+    public function originalityPreflight(array $document, array $evidence): array
+    {
+        $fields = array_intersect_key($document, array_flip(['headline', 'excerpt', 'seo_title', 'seo_description']));
+        foreach ($document['takeaways'] as $index => $takeaway) {
+            $fields['takeaways.'.$index] = $takeaway;
+        }
+        foreach ($document['sections'] as $sectionIndex => $section) {
+            $fields['sections.'.$sectionIndex.'.heading'] = $section['heading'];
+            foreach ($section['paragraphs'] as $paragraphIndex => $paragraph) {
+                $fields['sections.'.$sectionIndex.'.paragraphs.'.$paragraphIndex.'.text'] = $paragraph['text'];
+            }
+        }
+        $overlaps = [];
+        foreach ($fields as $field => $value) {
+            foreach ($this->sourceOverlaps($value, $evidence) as $phrase) {
+                $overlaps[] = ['field' => $field, 'phrase' => $phrase];
+                if (count($overlaps) === 5) {
+                    break 2;
+                }
+            }
+        }
+
+        return ['threshold_words' => 12, 'overlaps' => $overlaps];
+    }
+
+    /** @return array{verified_claim_count: int, target_body_words: array{int, int}, target_paragraphs: int, target_sections: int} */
+    public function writingBrief(array $evidence): array
+    {
+        $count = count(array_unique(array_column($evidence['claims'], 'text')));
+
+        return ['verified_claim_count' => $count, 'target_body_words' => $count <= 2 ? [60, 110] : [90, min(360, 60 * $count)],
+            'target_paragraphs' => $count <= 2 ? 2 : min(6, $count), 'target_sections' => $count <= 2 ? 1 : min(4, $count)];
     }
 
     /** @return list<string> */

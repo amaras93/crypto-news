@@ -46,6 +46,21 @@ class AiAutomation
                     continue;
                 }
             }
+            foreach (AiGenerationRun::where('is_automated', true)->where('status', AiRunStatus::QualityBlocked)
+                ->where('error_code', 'originality_correction_available')->whereDoesntHave('children')->oldest('id')->limit(5)->get() as $run) {
+                try {
+                    $pipeline->correctOriginality($actor, $run);
+                    $count++;
+                } catch (AiFailure $failure) {
+                    if ($run->fresh()->children()->exists()) {
+                        continue;
+                    }
+                    $report = $run->quality_report;
+                    $report['originality_correction'] = ['status' => 'held', 'reason' => $failure->reason, 'maximum_additional_requests' => 1];
+                    $run->forceFill(['error_code' => $failure->reason, 'quality_report' => $report])->save();
+                    $this->holdCandidate($run->candidate, $failure->reason);
+                }
+            }
             foreach (Article::where('automation_status', 'processing')->oldest('id')->limit(10)->get() as $article) {
                 $this->advance($article, $actor);
             }

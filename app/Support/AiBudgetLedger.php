@@ -42,15 +42,7 @@ class AiBudgetLedger
             }
             $day = $periods->firstWhere('period_key', $keys[0]);
             $month = $periods->firstWhere('period_key', $keys[1]);
-            $dayLimit = min((int) config('ai.daily_limit_microusd'), $limits['daily'] ?? PHP_INT_MAX);
-            $monthLimit = min((int) config('ai.monthly_limit_microusd'), $limits['monthly'] ?? PHP_INT_MAX);
-            $articleLimit = min((int) config('ai.max_articles_per_day'), $limits['articles'] ?? PHP_INT_MAX);
-            if ($dayLimit <= 0 || $monthLimit <= 0 || $articleLimit <= 0
-                || $day->actual_microusd + $day->reserved_microusd + $estimatedMicrousd > $dayLimit
-                || $month->actual_microusd + $month->reserved_microusd + $estimatedMicrousd > $monthLimit
-                || ($countsArticle && $day->actual_articles + $day->reserved_articles >= $articleLimit)) {
-                throw ValidationException::withMessages(['budget' => 'The configured budget or daily article allowance is exhausted.']);
-            }
+            $this->assertAllowance($day, $month, $estimatedMicrousd, $limits, $countsArticle);
             foreach ($periods as $period) {
                 $period->reserved_microusd += $estimatedMicrousd;
                 $period->reserved_articles += (int) $countsArticle;
@@ -67,6 +59,29 @@ class AiBudgetLedger
 
             return $reservation;
         }, 3);
+    }
+
+    public function assertAvailable(int $estimatedMicrousd, array $limits = [], bool $countsArticle = true): void
+    {
+        if (config('ai.emergency_stop')) {
+            throw ValidationException::withMessages(['budget' => 'The AI emergency stop is active.']);
+        }
+        $day = AiBudgetPeriod::where('period_key', 'day:'.now()->utc()->toDateString())->first();
+        $month = AiBudgetPeriod::where('period_key', 'month:'.now()->utc()->format('Y-m'))->first();
+        $this->assertAllowance($day, $month, $estimatedMicrousd, $limits, $countsArticle);
+    }
+
+    private function assertAllowance(?AiBudgetPeriod $day, ?AiBudgetPeriod $month, int $estimatedMicrousd, array $limits, bool $countsArticle): void
+    {
+        $dayLimit = min((int) config('ai.daily_limit_microusd'), $limits['daily'] ?? PHP_INT_MAX);
+        $monthLimit = min((int) config('ai.monthly_limit_microusd'), $limits['monthly'] ?? PHP_INT_MAX);
+        $articleLimit = min((int) config('ai.max_articles_per_day'), $limits['articles'] ?? PHP_INT_MAX);
+        if ($estimatedMicrousd <= 0 || $dayLimit <= 0 || $monthLimit <= 0 || $articleLimit <= 0
+            || ($day?->actual_microusd ?? 0) + ($day?->reserved_microusd ?? 0) + $estimatedMicrousd > $dayLimit
+            || ($month?->actual_microusd ?? 0) + ($month?->reserved_microusd ?? 0) + $estimatedMicrousd > $monthLimit
+            || ($countsArticle && ($day?->actual_articles ?? 0) + ($day?->reserved_articles ?? 0) >= $articleLimit)) {
+            throw ValidationException::withMessages(['budget' => 'The configured budget or daily article allowance is exhausted.']);
+        }
     }
 
     public function settle(User $actor, AiSpendReservation $reservation, int $actualMicrousd, ?int $inputTokens = null, ?int $outputTokens = null, ?int $cachedTokens = null, ?int $writeTokens = null): AiSpendReservation

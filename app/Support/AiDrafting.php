@@ -287,10 +287,13 @@ class AiDrafting
             $run->status = $report['critical'] ? AiRunStatus::QualityBlocked : AiRunStatus::Validated;
             if ($report['critical']) {
                 $run->active_key = null;
-                $run->error_code = 'critical_quality_failure';
+                $run->error_code = $this->canCorrectOriginality($run, $report) ? 'originality_correction_available' : 'critical_quality_failure';
+                if ($run->error_code === 'originality_correction_available') {
+                    $run->quality_report = $report + ['originality_correction' => ['status' => 'available', 'maximum_additional_requests' => 1]];
+                }
                 $run->completed_at = now();
                 if ($run->is_automated && $run->task === 'english' && ! $run->article_id) {
-                    $run->candidate->forceFill(['automation_status' => 'held', 'automation_error' => 'critical_quality_failure'])->save();
+                    $run->candidate->forceFill(['automation_status' => 'held', 'automation_error' => $run->error_code])->save();
                 }
             }
             $run->save();
@@ -471,7 +474,13 @@ class AiDrafting
                 'allowed_numerical_strings' => $this->quality->numbers(implode(' ', array_column($claims, 'text')).' '
                     .implode(' ', collect($claims)->flatMap(fn (array $claim): array => $claim['figures'])->all())),
                 'claim_ids_location' => 'sections[].paragraphs[].claim_ids only; never public text',
-                'minimum_distinct_paragraphs' => 2, 'maximum_consecutive_source_words' => 11]];
+                'minimum_distinct_paragraphs' => 2, 'maximum_consecutive_source_words' => 11,
+                'writing_brief' => $this->quality->writingBrief($run->evidence_snapshot)]];
+        if ($run->parent?->status === AiRunStatus::QualityBlocked) {
+            $payload['originality_correction'] = ['rejected_document' => $run->parent->output_document,
+                'overlaps' => $run->parent->quality_report['originality']['overlaps'] ?? [],
+                'instruction' => 'Recompose affected sentences and all public metadata from verified claims; the rejected draft is not evidence. Preserve facts and internal claim_ids. Do not delete overlapping words as a shortcut.'];
+        }
         if ($run->task !== 'english') {
             $english = $run->article->fresh(['translations'])->translation('en');
             $payload['english'] = $english->only(['title', 'slug', 'excerpt', 'summary', 'body', 'meta_title', 'meta_description']);
@@ -533,7 +542,7 @@ class AiDrafting
             $record->status = $uncertain ? AiRunStatus::Uncertain : AiRunStatus::Failed;
             $record->error_code = $failure->reason;
             $record->provider_response_id = $failure->responseId ?? $record->provider_response_id;
-            $record->retry_at = ! $uncertain && $failure->retryable
+            $record->retry_at = $record->parent?->status !== AiRunStatus::QualityBlocked && ! $uncertain && $failure->retryable
                 ? now()->addSeconds(max($failure->retrySeconds, 60 * (2 ** ($record->attempt - 1)))) : null;
             $record->active_key = $uncertain ? $record->active_key : null;
             $record->completed_at = now();
@@ -547,11 +556,72 @@ class AiDrafting
         }, 3);
     }
 
+    private function canCorrectOriginality(AiGenerationRun $run, array $report): bool
+    {
+        return $run->is_automated && ! $run->is_simulated && $run->task === 'english' && $run->locale === 'en'
+            && ! $run->parent_run_id && ! $run->article_id && $run->attempt < config('ai.max_attempts')
+            && ($report['originality']['overlaps'] ?? []) !== [] && ($report['critical'] ?? []) !== []
+            && array_diff($report['critical'], ['excessive_source_similarity', 'claim_mismatch:excessive_source_similarity']) === [];
+    }
+
+    public function correctOriginality(User $actor, AiGenerationRun $old, bool $dispatch = true): AiGenerationRun
+    {
+        abort_unless($actor->fresh()?->is_admin, 403);
+        try {
+            $run = DB::transaction(function () use ($actor, $old): AiGenerationRun {
+                $record = AiGenerationRun::query()->lockForUpdate()->findOrFail($old->id);
+                if ($record->status !== AiRunStatus::QualityBlocked || $record->error_code !== 'originality_correction_available'
+                    || ! $this->canCorrectOriginality($record, $record->quality_report ?? []) || $record->children()->exists()
+                    || $record->billing_user_id !== $actor->id || $record->reservation?->status !== 'settled') {
+                    throw new AiFailure('originality_correction_not_allowed');
+                }
+                $this->authorize($record);
+                $settings = $this->settings->assertLive('english');
+                if ($settings['model'] !== $record->model || $settings['provider'] !== $record->provider) {
+                    throw new AiFailure('originality_correction_provider_changed');
+                }
+                try {
+                    $document = $this->schema->validate($record->output_document ?? [], $record);
+                } catch (ValidationException) {
+                    throw new AiFailure('originality_correction_not_allowed');
+                }
+                $report = $this->quality->document($document, $record);
+                if (! $this->canCorrectOriginality($record, $report)) {
+                    throw new AiFailure('originality_correction_not_allowed');
+                }
+                $preview = $record->replicate();
+                $preview->parent_run_id = $record->id;
+                $payload = $this->payload($preview);
+                $rates = $this->pricing->snapshot($record->model);
+                $estimate = $this->pricing->reservation($payload, $this->schema->jsonSchema($preview), $rates,
+                    app(OpenAiDraftProvider::class)->instructions($preview));
+                $this->ledger->assertAvailable($estimate, $this->settings->limits());
+                $child = $this->create($actor, $record->candidate, 'english', 'en', $record->author,
+                    false, false, false, null, null, false, automated: true);
+                if ($child->evidence_digest !== $record->evidence_digest) {
+                    throw new AiFailure('evidence_changed');
+                }
+                $child->forceFill(['parent_run_id' => $record->id, 'attempt' => $record->attempt + 1])->save();
+                $record->forceFill(['error_code' => 'originality_correction_queued', 'quality_report' => $report + [
+                    'originality_correction' => ['status' => 'queued', 'maximum_additional_requests' => 1, 'child_run_id' => $child->id]]])->save();
+
+                return $child;
+            }, 3);
+        } catch (ValidationException) {
+            throw new AiFailure('originality_correction_budget_unavailable');
+        }
+        if ($dispatch) {
+            $this->dispatch($run);
+        }
+
+        return $run->fresh();
+    }
+
     public function retry(User $actor, AiGenerationRun $old, bool $dispatch = true): AiGenerationRun
     {
         abort_unless($actor->fresh()?->is_admin, 403);
         $old = $old->fresh();
-        if ($old->status !== AiRunStatus::Failed || ! $old->retry_at || $old->retry_at->isFuture()
+        if ($old->parent?->status === AiRunStatus::QualityBlocked || $old->status !== AiRunStatus::Failed || ! $old->retry_at || $old->retry_at->isFuture()
             || $old->attempt >= config('ai.max_attempts') || ! in_array($old->error_code, ['provider_rate_limited', 'queue_unavailable'], true)) {
             throw new AiFailure('retry_not_safe_or_due');
         }

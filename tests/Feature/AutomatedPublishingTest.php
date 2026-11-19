@@ -152,6 +152,30 @@ class AutomatedPublishingTest extends AiTestCase
         $this->assertDatabaseCount('articles', 0);
     }
 
+    public function test_a_corrected_english_draft_still_requires_all_eight_quality_and_semantic_checks(): void
+    {
+        config(['ai.max_articles_per_day' => 2]);
+        AiPipelineSetting::find(1)->update(['max_articles_per_day' => 2]);
+        $root = app(AiDrafting::class)->generate($this->admin, $this->candidate, dispatch: false, automated: true);
+        $document = app(FakeAiDraftProvider::class)->fixture($root);
+        $document['sections'][0]['paragraphs'][0]['text'] = $root->evidence_snapshot['claims'][0]['text'];
+        Http::fake(['api.openai.com/*' => Http::response($this->response($root, $document))]);
+        app(AiDrafting::class)->process($root->id, false);
+        app(AiDrafting::class)->validate($root->id, false);
+        $this->assertSame('originality_correction_available', $root->fresh()->error_code);
+        $this->mockResponses();
+        $article = $this->drain();
+        $this->assertSame('published', $article->automation_status);
+        $this->assertSame(8, $article->translations()->count());
+        $this->assertSame(8, $article->translations()->where('ai_review_status', 'automated')->count());
+        $this->assertSame(8, AiGenerationRun::where('task', 'verification')->where('status', AiRunStatus::Stored)->count());
+        $this->assertSame(17, AiGenerationRun::count());
+        $this->assertSame(1, $root->children()->count());
+        $this->assertSame($root->children()->sole()->id, $article->ai_generation_run_id);
+        $this->assertSame(2, AiBudgetPeriod::where('period_key', 'like', 'day:%')->sole()->actual_articles);
+        $this->assertSame(AiRunStatus::QualityBlocked, $root->fresh()->status);
+    }
+
     public function test_discovery_to_publication_completes_eight_languages_without_human_review(): void
     {
         DiscoverySetting::factory()->create(['enabled' => true]);

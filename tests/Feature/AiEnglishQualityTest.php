@@ -70,7 +70,7 @@ class AiEnglishQualityTest extends AiTestCase
         $document = app(AiOutputSchema::class)->validate($this->originalDocument(), $run);
         $report = app(AiQuality::class)->document($document, $run);
         $this->assertSame([], $report['critical']);
-        $this->assertSame('quality-v2', $report['checks_version']);
+        $this->assertSame('quality-v3', $report['checks_version']);
         $this->assertFalse($report['human_review_required']);
         $body = app(AiOutputSchema::class)->body($document, $run->evidence_snapshot);
         foreach ($run->evidence_snapshot['claims'] as $index => $claim) {
