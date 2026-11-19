@@ -18,6 +18,7 @@ use App\Support\AiDemoFixtures;
 use App\Support\AiDrafting;
 use App\Support\AiOutputSchema;
 use App\Support\AiPricing;
+use App\Support\AiQuality;
 use App\Support\AiRecovery;
 use App\Support\AiSemanticVerification;
 use App\Support\AiSettings;
@@ -499,6 +500,43 @@ class AiAutonomousRecoveryTest extends AiTestCase
         $this->assertFalse($payload['correction']['diagnostics']['checks']['original']);
         $this->assertSame([], $payload['correction']['diagnostics']['checks']['issues']);
         $this->assertSame([], $payload['correction']['diagnostics']['failed_fields']);
+        Http::assertNothingSent();
+    }
+
+    public function test_translation_warning_remains_blocking_and_is_corrected_without_repeating_english(): void
+    {
+        $english = $this->english();
+        $this->verifyEnglish($english);
+        $translation = app(AiDrafting::class)->translate($this->admin, $english->article->fresh(), ['ru'], dispatch: false)[0];
+        $document = app(FakeAiDraftProvider::class)->fixture($translation);
+        $document['unsupported_claim_warnings'] = ['An official evidenced name was retained in the translation.'];
+        $this->fakeProvider($this->response($translation, $document));
+        app(AiDrafting::class)->process($translation->id, false);
+        app(AiDrafting::class)->validate($translation->id, false);
+        $this->assertSame(AiRunStatus::QualityBlocked, $translation->fresh()->status);
+        $this->assertSame(['model_reported_unsupported_claims'], $translation->fresh()->quality_report['critical']);
+        $report = $translation->fresh()->quality_report;
+        $report['recovery'] = ['state' => 'held', 'reason' => 'critical_quality_failure'];
+        $translation->forceFill(['quality_report' => $report])->save();
+        $english->article->forceFill(['automation_status' => 'held', 'automation_error' => 'critical_quality_failure'])->save();
+        $article = $this->drain();
+        $this->assertSame(ArticleStatus::Published, $article->status);
+        $this->assertSame(1, AiGenerationRun::where('task', 'english')->count());
+        $this->assertSame(2, AiGenerationRun::where('task', 'translation')->where('locale', 'ru')->count());
+        $this->assertSame($document, $translation->fresh()->output_document);
+        $this->assertSame(8, $article->translations()->where('ai_review_status', 'automated')->count());
+    }
+
+    public function test_actual_official_name_warning_is_not_silently_cleared_or_accepted(): void
+    {
+        $fixture = json_decode(file_get_contents(base_path('tests/Fixtures/rejected-federal-reserve-editorial-warning.json')), true, flags: JSON_THROW_ON_ERROR);
+        $run = new AiGenerationRun(['task' => 'translation', 'locale' => 'ru', 'evidence_snapshot' => $fixture['evidence']]);
+        $run->schema_version = 'translation-v2';
+        $run->input_payload = $fixture['input'];
+        $run->is_automated = true;
+        $report = app(AiQuality::class)->document($fixture['output'], $run);
+        $this->assertSame(['model_reported_unsupported_claims'], $report['critical']);
+        $this->assertStringContainsString('Regulation W', $fixture['output']['unsupported_claim_warnings'][0]);
         Http::assertNothingSent();
     }
 }

@@ -1,0 +1,274 @@
+{
+  "output": {
+    "version": "translation-v2",
+    "language": "ru",
+    "headline": "Совет Федеральной резервной системы объявил о запрете по согласию в отношении бывшего сотрудника First Security Bancorp",
+    "excerpt": "В четверг Совет Федеральной резервной системы сообщил, что исполнил запрет по согласию в отношении Раша Ф. Хардинга III, бывшего сотрудника First Security Bancorp, из-за нарушения фидуциарных обязанностей и нарушения Regulation W.",
+    "seo_title": "Совет Федеральной резервной системы объявил о запрете по согласию в отношении бывшего сотрудника FIr",
+    "seo_description": "Совет Федеральной резервной системы сообщил в четверг, что исполнил запрет по согласию в отношении Раша Ф. Хардинга III, бывшего сотрудника First Security Bancorp, из-за нарушения фидуциарных обязанностей и нарушения Regulation W.",
+    "slug": "sovet-federalnoj-rezervnoj-sistemy-zapret-po-soglasiyu-byvshij-sotrudnik-first-security-bancorp",
+    "takeaways": [
+      "Совет Федеральной резервной системы сообщил о выполнении меры по исполнению в четверг.",
+      "Мера представляет собой запрет по согласию в отношении Раша Ф. Хардинга III.",
+      "В уведомлении он указан как бывший сотрудник First Security Bancorp.",
+      "Указаны нарушение фидуциарных обязанностей и нарушение Regulation W."
+    ],
+    "sections": [
+      {
+        "key": "story",
+        "heading": "Сообщение Совета Федеральной резервной системы",
+        "paragraphs": [
+          {
+            "text": "В четверг Совет Федеральной резервной системы объявил о выполнении меры по исполнению, указанной в уведомлении. Речь идет о запрете по согласию в отношении Раша Ф. Хардинга III.",
+            "claim_ids": [
+              "00000000-0000-4000-8000-000000000001",
+              "00000000-0000-4000-8000-000000000002"
+            ]
+          },
+          {
+            "text": "В уведомлении Хардинг назван бывшим сотрудником First Security Bancorp. В нем также указаны нарушение фидуциарных обязанностей и нарушение Regulation W.",
+            "claim_ids": [
+              "00000000-0000-4000-8000-000000000002"
+            ]
+          }
+        ]
+      }
+    ],
+    "entities": [
+      "Federal Reserve Board",
+      "Thursday",
+      "Consent",
+      "Rush",
+      "Harding III Former",
+      "First Security Bancorp Breach",
+      "Regulation"
+    ],
+    "suggested_tags": [
+      "Совет Федеральной резервной системы",
+      "запрет по согласию",
+      "First Security Bancorp",
+      "Regulation W",
+      "исполнение меры"
+    ],
+    "editorial_notes": [],
+    "unsupported_claim_warnings": [
+      "В исходных данных термин Regulation W сохранён без перевода, поскольку это официальное название из подтверждённых данных."
+    ],
+    "entity_mentions": [
+      {
+        "canonical": "Federal Reserve Board",
+        "localized": "Совет Федеральной резервной системы"
+      },
+      {
+        "canonical": "Thursday",
+        "localized": "в четверг"
+      },
+      {
+        "canonical": "Consent",
+        "localized": "по согласию"
+      },
+      {
+        "canonical": "Rush",
+        "localized": "Раша"
+      },
+      {
+        "canonical": "Harding III Former",
+        "localized": "Хардинга III, бывшего сотрудника"
+      },
+      {
+        "canonical": "First Security Bancorp Breach",
+        "localized": "First Security Bancorp"
+      },
+      {
+        "canonical": "Regulation",
+        "localized": "Regulation W"
+      }
+    ]
+  },
+  "evidence": {
+    "claims": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "text": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:",
+        "entities": [
+          "Federal Reserve Board",
+          "Thursday"
+        ],
+        "figures": [],
+        "material": true,
+        "verified_at": null,
+        "verification_method": "automated_primary",
+        "automated_verified_at": "2026-11-19T16:24:15+00:00",
+        "references": [
+          {
+            "reference_id": 2,
+            "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261119a.htm",
+            "publisher": "Board of Governors of the Federal Reserve System",
+            "publisher_group": "federal-reserve-board",
+            "primary": true,
+            "source_timestamp": "2026-11-19T16:00:00+00:00",
+            "retrieved_at": "2026-11-19T16:23:57+00:00",
+            "licensing_notes": "Verified 2026-11-19: https://www.federalreserve.gov/disclaimer.htm states Board information is public domain unless otherwise indicated, with source attribution requested. Approved for machine retrieval and original factual summaries of Board-authored text under that public-domain basis, not a separate AI license. Excludes third-party copyrighted material, seals, logos and endorsement claims. Preserve publisher attribution and source URL.",
+            "source_version": 2
+          }
+        ]
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000002",
+        "text": "Consent prohibition against Rush F. Harding III Former employee of First Security Bancorp Breach of fiduciary duty and violation of Regulation W",
+        "entities": [
+          "Consent",
+          "Rush",
+          "Harding III Former",
+          "First Security Bancorp Breach",
+          "Regulation"
+        ],
+        "figures": [],
+        "material": true,
+        "verified_at": null,
+        "verification_method": "automated_primary",
+        "automated_verified_at": "2026-11-19T16:24:15+00:00",
+        "references": [
+          {
+            "reference_id": 2,
+            "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261119a.htm",
+            "publisher": "Board of Governors of the Federal Reserve System",
+            "publisher_group": "federal-reserve-board",
+            "primary": true,
+            "source_timestamp": "2026-11-19T16:00:00+00:00",
+            "retrieved_at": "2026-11-19T16:23:57+00:00",
+            "licensing_notes": "Verified 2026-11-19: https://www.federalreserve.gov/disclaimer.htm states Board information is public domain unless otherwise indicated, with source attribution requested. Approved for machine retrieval and original factual summaries of Board-authored text under that public-domain basis, not a separate AI license. Excludes third-party copyrighted material, seals, logos and endorsement claims. Preserve publisher attribution and source URL.",
+            "source_version": 2
+          }
+        ]
+      }
+    ],
+    "candidate_id": 2,
+    "candidate_headline": "Federal Reserve Board issues enforcement action with former employee of First Security Bancorp",
+    "is_simulated": false
+  },
+  "input": {
+    "task": "translation",
+    "language": "ru",
+    "section": null,
+    "claims": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "text": "The Federal Reserve Board on Thursday announced the execution of the enforcement action listed below:",
+        "entities": [
+          "Federal Reserve Board",
+          "Thursday"
+        ],
+        "figures": [],
+        "references": [
+          {
+            "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261119a.htm",
+            "publisher": "Board of Governors of the Federal Reserve System",
+            "primary": true,
+            "source_timestamp": "2026-11-19T16:00:00+00:00",
+            "retrieved_at": "2026-11-19T16:23:57+00:00"
+          }
+        ]
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000002",
+        "text": "Consent prohibition against Rush F. Harding III Former employee of First Security Bancorp Breach of fiduciary duty and violation of Regulation W",
+        "entities": [
+          "Consent",
+          "Rush",
+          "Harding III Former",
+          "First Security Bancorp Breach",
+          "Regulation"
+        ],
+        "figures": [],
+        "references": [
+          {
+            "url": "https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261119a.htm",
+            "publisher": "Board of Governors of the Federal Reserve System",
+            "primary": true,
+            "source_timestamp": "2026-11-19T16:00:00+00:00",
+            "retrieved_at": "2026-11-19T16:23:57+00:00"
+          }
+        ]
+      }
+    ],
+    "editorial_constraints": {
+      "allowed_entities": [
+        "Federal Reserve Board",
+        "Thursday",
+        "Consent",
+        "Rush",
+        "Harding III Former",
+        "First Security Bancorp Breach",
+        "Regulation"
+      ],
+      "allowed_numerical_strings": [],
+      "claim_ids_location": "sections[].paragraphs[].claim_ids only; never public text",
+      "minimum_distinct_paragraphs": 2,
+      "maximum_consecutive_source_words": 11,
+      "writing_brief": {
+        "verified_claim_count": 2,
+        "target_body_words": [
+          60,
+          110
+        ],
+        "target_paragraphs": 2,
+        "target_sections": 1
+      }
+    },
+    "english": {
+      "title": "Federal Reserve Board announces consent prohibition involving former First Security Bancorp employee",
+      "slug": "federal-reserve-board-consent-prohibition-former-first-security-bancorp-employee",
+      "excerpt": "The Federal Reserve Board said on Thursday that it executed a consent prohibition against Rush F. Harding III, a former employee of First Security Bancorp, over breach of fiduciary duty and violation of Regulation W.",
+      "summary": [
+        "The Federal Reserve Board announced the execution of an enforcement action on Thursday.",
+        "The action is a consent prohibition against Rush F. Harding III.",
+        "The notice identifies Harding as a former employee of First Security Bancorp.",
+        "The stated issues are breach of fiduciary duty and violation of Regulation W."
+      ],
+      "body": "<h2 id=\"ai-story\">Federal Reserve Board action</h2><p>The Federal Reserve Board said on Thursday that it executed an enforcement action listed in its notice. The action is a consent prohibition involving Rush F. Harding III. <a href=\"https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261119a.htm\" rel=\"noopener noreferrer\">Board of Governors of the Federal Reserve System</a></p><p>The notice identifies Harding as a former employee of First Security Bancorp. It cites breach of fiduciary duty and violation of Regulation W. <a href=\"https://www.federalreserve.gov/newsevents/pressreleases/enforcement20261119a.htm\" rel=\"noopener noreferrer\">Board of Governors of the Federal Reserve System</a></p>",
+      "meta_title": "Federal Reserve Board announces consent prohibition against former First Security Bancorp employee",
+      "meta_description": "The Federal Reserve Board said on Thursday it executed a consent prohibition against Rush F. Harding III, a former employee of First Security Bancorp, for breach of fiduciary duty and violation of Regulation W."
+    },
+    "english_text": "Federal Reserve Board announces consent prohibition involving former First Security Bancorp employee The Federal Reserve Board said on Thursday that it executed a consent prohibition against Rush F. Harding III, a former employee of First Security Bancorp, over breach of fiduciary duty and violation of Regulation W. Federal Reserve Board announces consent prohibition against former First Security Bancorp employee The Federal Reserve Board said on Thursday it executed a consent prohibition against Rush F. Harding III, a former employee of First Security Bancorp, for breach of fiduciary duty and violation of Regulation W. The Federal Reserve Board announced the execution of an enforcement action on Thursday. The action is a consent prohibition against Rush F. Harding III. The notice identifies Harding as a former employee of First Security Bancorp. The stated issues are breach of fiduciary duty and violation of Regulation W. Federal Reserve Board action The Federal Reserve Board said on Thursday that it executed an enforcement action listed in its notice. The action is a consent prohibition involving Rush F. Harding III. Board of Governors of the Federal Reserve System The notice identifies Harding as a former employee of First Security Bancorp. It cites breach of fiduciary duty and violation of Regulation W. Board of Governors of the Federal Reserve System",
+    "preserved_entities": [
+      "Federal Reserve Board",
+      "Thursday",
+      "Rush",
+      "Regulation"
+    ]
+  },
+  "report": {
+    "critical": [
+      "model_reported_unsupported_claims"
+    ],
+    "warnings": [
+      "Separate automated semantic verification is required before this content can be published."
+    ],
+    "human_review_required": false,
+    "checks_version": "quality-v3",
+    "claim_links": [
+      {
+        "text_digest": "2a27fcd9b0b80310a8135f62ae45ac3a7109ebe92277fb4a3bb023dc83081189",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "text_digest": "402f88b01b3039a470ec34e9a83e358194f7cb8ece0b61e433675851074fdc7e",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      }
+    ],
+    "originality": {
+      "threshold_words": 12,
+      "overlaps": []
+    },
+    "recovery": {
+      "state": "held",
+      "reason": "critical_quality_failure"
+    }
+  }
+}

@@ -14,7 +14,8 @@ class AiRecovery
     {
         $inconsistent = $run->task === 'verification' && $run->schema_version === 'verification-v2'
             && app(AiSemanticVerification::class)->inconsistent($run->output_document ?? []);
-        if (! $inconsistent && ($run->quality_report['recovery']['state'] ?? null) === 'held' && ($run->quality_report['recovery']['reason'] ?? null) !== 'recovery_budget_unavailable') {
+        $formatWarning = $run->task === 'translation' && ($run->quality_report['critical'] ?? []) === ['model_reported_unsupported_claims'];
+        if (! $inconsistent && ! $formatWarning && ($run->quality_report['recovery']['state'] ?? null) === 'held' && ($run->quality_report['recovery']['reason'] ?? null) !== 'recovery_budget_unavailable') {
             return null;
         }
         if (! $run->is_automated || $run->is_simulated || $run->children()->exists()
@@ -63,6 +64,9 @@ class AiRecovery
         if (in_array('excessive_source_similarity', $critical, true) && $run->task === 'english') {
             return null;
         }
+        if ($run->task === 'translation' && $critical === ['model_reported_unsupported_claims']) {
+            return 'format_correction';
+        }
         foreach ($critical as $failure) {
             if (! preg_match('/\A(?:claim_mismatch:)?(?:technical_evidence_id_in_public_text|unsupported_(?:entity|number|symbol|currency):[^\r\n]+|excessive_source_similarity|language_script_mismatch|translation_numbers_or_dates_changed|translation_entity_missing:[^\r\n]+|seo_[a-z_]+)\z/D', $failure)) {
                 return null;
@@ -80,7 +84,10 @@ class AiRecovery
             ->where(fn ($query) => $query->whereNull('quality_report->recovery->state')->orWhere('quality_report->recovery->state', 'available')
                 ->orWhere('quality_report->recovery->reason', 'recovery_budget_unavailable')
                 ->orWhere(fn ($verifier) => $verifier->where('task', 'verification')->where('schema_version', 'verification-v2')
-                    ->where('quality_report->recovery->reason', 'critical_quality_failure')))->oldest('id')->limit(50)->get() as $run) {
+                    ->where('quality_report->recovery->reason', 'critical_quality_failure'))
+                ->orWhere(fn ($translation) => $translation->where('task', 'translation')
+                    ->where('quality_report->recovery->reason', 'critical_quality_failure')
+                    ->whereJsonContains('quality_report->critical', 'model_reported_unsupported_claims')))->oldest('id')->limit(50)->get() as $run) {
             if (! $run->article_id && (Article::where('automation_status', 'processing')->exists()
                 || AiGenerationRun::where('task', 'english')->where('news_candidate_id', '<>', $run->news_candidate_id)
                     ->whereIn('status', [AiRunStatus::Queued, AiRunStatus::Requesting, AiRunStatus::Received, AiRunStatus::Validated])->exists())) {
