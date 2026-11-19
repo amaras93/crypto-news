@@ -128,13 +128,15 @@ class AutomatedEvidence
         $dates = $xpath->query($heading.'/p[contains(concat(" ", normalize-space(@class), " "), " article__time ")]');
         $times = $xpath->query($heading.'/p[contains(concat(" ", normalize-space(@class), " "), " releaseTime ")]');
         $titles = $xpath->query($heading.'/h3[contains(concat(" ", normalize-space(@class), " "), " title ")]');
-        $identities = $xpath->query('//head/meta[@property="og:url"]/@content | //head/link[@rel="canonical"]/@href');
+        $identities = $xpath->query('//*[not(ancestor::template or ancestor::noscript or ancestor::svg or ancestor::math)]'
+            .'[self::meta[translate(normalize-space(@property), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")="og:url"]'
+            .' or self::link[contains(concat(" ", translate(normalize-space(@rel), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), " "), " canonical ")]]');
         if ($xpath->query('//*[@id="article"]')->length !== 1 || $titles->length !== 1 || $identities->length < 1
             || $this->normalizer->headline($titles->item(0)->textContent) !== $this->normalizer->headline($reference->headline)) {
             throw new AiFailure('primary_material_identity_mismatch');
         }
         foreach ($identities as $identity) {
-            if (trim($identity->nodeValue) !== $url) {
+            if (trim($identity->getAttribute($identity->nodeName === 'meta' ? 'content' : 'href')) !== $url) {
                 throw new AiFailure('primary_material_identity_mismatch');
             }
         }
