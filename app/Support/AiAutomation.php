@@ -8,6 +8,7 @@ use App\CandidateStatus;
 use App\Jobs\VerifyNewsCandidate;
 use App\Models\AiGenerationRun;
 use App\Models\Article;
+use App\Models\EditorialEvent;
 use App\Models\NewsCandidate;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
@@ -33,8 +34,11 @@ class AiAutomation
             if (! $actor?->is_admin || ! $author?->isEditorial()) {
                 return 0;
             }
+            if (EditorialEvent::where('action', 'automatic_published')->where('created_at', '>=', now()->utc()->startOfDay())->count() >= $this->settings->limits()['articles']) {
+                return 0;
+            }
             $pipeline = app(AiDrafting::class);
-            $count = 0;
+            $count = app(AiRecovery::class)->tick($actor);
             foreach (AiGenerationRun::where('is_automated', true)->where('status', AiRunStatus::Failed)
                 ->whereNotNull('retry_at')->where('retry_at', '<=', now())->where('attempt', '<', config('ai.max_attempts'))
                 ->whereDoesntHave('article', fn ($query) => $query->whereIn('automation_status', ['paused', 'published']))
@@ -67,7 +71,17 @@ class AiAutomation
             if (! config('ai.scheduled_generation_enabled') || ! $current['scheduled_generation_enabled'] || ! $pipeline->isOperational()) {
                 return $count;
             }
-            $limit = min(5, $this->settings->limits()['articles']);
+            $remaining = $this->settings->limits()['articles'] - EditorialEvent::where('action', 'automatic_published')->where('created_at', '>=', now()->utc()->startOfDay())->count();
+            $pending = AiGenerationRun::where('is_automated', true)->whereDoesntHave('children')
+                ->where(fn ($query) => $query->whereIn('status', [AiRunStatus::Queued, AiRunStatus::Requesting, AiRunStatus::Received, AiRunStatus::Validated])
+                    ->orWhere(fn ($retry) => $retry->whereNotNull('retry_at')->where('attempt', '<', config('ai.max_attempts'))
+                        ->whereIn('status', [AiRunStatus::QualityBlocked, AiRunStatus::Failed])))
+                ->pluck('news_candidate_id');
+            $inProgress = Article::where('automation_status', 'processing')->pluck('ai_candidate_id')->merge($pending)->unique()->count();
+            if ($remaining <= $inProgress || ! $this->generationBudgetAvailable()) {
+                return $count;
+            }
+            $limit = min(5, $remaining - $inProgress);
             foreach (NewsCandidate::where('is_simulated', false)->whereNull('duplicate_of_id')
                 ->whereIn('category_id', $current['enabled_category_ids'])->where('status', CandidateStatus::ApprovedForDraft)
                 ->where('automation_status', 'evidence_verified')->whereDoesntHave('aiRuns')->oldest('id')->limit($limit)->get() as $candidate) {
@@ -91,6 +105,21 @@ class AiAutomation
             return $count;
         } finally {
             $lock->release();
+        }
+    }
+
+    private function generationBudgetAvailable(): bool
+    {
+        try {
+            $pricing = app(AiPricing::class);
+            $rates = $pricing->snapshot($this->settings->current()['model']);
+            $estimate = $pricing->component(config('ai.max_input_tokens'), max($rates['input'], $rates['cached'], $rates['write']))
+                + $pricing->component(config('ai.max_output_tokens'), $rates['output']);
+            app(AiBudgetLedger::class)->assertAvailable($estimate, $this->settings->limits());
+
+            return true;
+        } catch (AiFailure|ValidationException) {
+            return false;
         }
     }
 
@@ -148,11 +177,15 @@ class AiAutomation
 
                     continue;
                 }
+                if (AiGenerationRun::where('article_id', $article->id)->where('locale', $locale)
+                    ->whereIn('status', [AiRunStatus::Queued, AiRunStatus::Requesting, AiRunStatus::Received, AiRunStatus::Validated])->exists()) {
+                    return;
+                }
                 $task = $translation ? 'verification' : 'translation';
-                $previous = AiGenerationRun::where('article_id', $article->id)->where('task', $task)->where('locale', $locale)->latest('id')->first();
+                $previous = AiGenerationRun::where('article_id', $article->id)->where('task', $task)->where('locale', $locale)->when($translation, fn ($query) => $query->where('id', '>', $translation->ai_run_id))->latest('id')->first();
                 if ($previous) {
                     if (in_array($previous->status, [AiRunStatus::Failed, AiRunStatus::Uncertain, AiRunStatus::QualityBlocked, AiRunStatus::Cancelled], true)) {
-                        if ($previous->status === AiRunStatus::Failed && $previous->retry_at && $previous->attempt < config('ai.max_attempts')) {
+                        if (app(AiRecovery::class)->pending($previous) || ($previous->status === AiRunStatus::Failed && $previous->retry_at && $previous->attempt < config('ai.max_attempts'))) {
                             return;
                         }
                         throw new AiFailure($previous->error_code ?? 'automatic_stage_failed');
@@ -179,6 +212,7 @@ class AiAutomation
             $reason = $failure instanceof AiFailure ? $failure->reason : 'automatic_publication_validation_failed';
             Article::whereKey($article->id)->where('automation_status', 'processing')
                 ->update(['automation_status' => 'held', 'automation_error' => $reason]);
+            $this->holdCandidate($article->aiRun->candidate, $reason);
             Log::notice('AI article held', ['article_id' => $article->id, 'reason' => $reason]);
         }
     }

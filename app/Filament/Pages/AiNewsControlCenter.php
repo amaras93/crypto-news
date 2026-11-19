@@ -93,7 +93,8 @@ class AiNewsControlCenter extends Page
             Select::make('author_id')->label('Actual editorial author for scheduled drafts')->options(fn (): array => User::where(fn ($query) => $query->where('is_admin', true)->orWhere('is_editor', true))->pluck('name', 'id')->all()),
             TextInput::make('daily_limit_microusd')->integer()->minValue(0)->required()->helperText('Integer micro-USD: 1,000,000 = USD 1. Server limits remain authoritative.'),
             TextInput::make('monthly_limit_microusd')->integer()->minValue(0)->required(),
-            TextInput::make('max_articles_per_day')->integer()->minValue(0)->maxValue(1000)->required(),
+            TextInput::make('max_articles_per_day')->label('Maximum published articles per day')->integer()->minValue(0)->maxValue(1000)->required(),
+            TextInput::make('max_generation_attempts_per_day')->label('English generation and correction attempts per day')->integer()->minValue(0)->maxValue(1000)->required(),
             TextInput::make('max_concurrent_jobs')->integer()->minValue(1)->maxValue(5)->required(),
             TextInput::make('max_translation_languages')->integer()->minValue(0)->maxValue(7)->required(),
         ])->disabled(fn (): bool => ! auth()->user()?->is_admin);
@@ -121,6 +122,13 @@ class AiNewsControlCenter extends Page
         $limits = app(AiSettings::class)->limits();
 
         return [
+            'Daily English attempt ceiling' => $limits['attempts'],
+            'Daily publication ceiling' => $limits['articles'],
+            'English API attempts today (includes failed requests)' => (int) (clone $runs)->where('task', 'english')->sum('request_count'),
+            'English follow-up attempts today' => (int) (clone $runs)->where('task', 'english')->whereNotNull('parent_run_id')->sum('request_count'),
+            'Translation API attempts today' => (int) (clone $runs)->where('task', 'translation')->sum('request_count'),
+            'Recovery waiting for backoff' => AiGenerationRun::whereNotNull('retry_at')->whereDoesntHave('children')->where('retry_at', '>', now())->count(),
+            'Persistent processing warnings' => AiGenerationRun::whereIn('status', [AiRunStatus::Failed, AiRunStatus::QualityBlocked, AiRunStatus::Uncertain])->whereDoesntHave('children')->count(),
             'Provider readiness' => app(AiDrafting::class)->isOperational() ? 'Configured locally; external acceptance unverified' : 'Stopped or incomplete configuration; no paid calls',
             'Drafts generated today (UTC, excludes simulations)' => AiGenerationRun::where('is_simulated', false)->where('completed_at', '>=', now()->utc()->startOfDay())->where('task', 'english')->where('status', AiRunStatus::Stored)->count(),
             'Pending translation runs' => AiGenerationRun::where('is_simulated', false)->where('task', 'translation')->whereIn('status', [AiRunStatus::Queued, AiRunStatus::Requesting, AiRunStatus::Received, AiRunStatus::Validated])->count(),

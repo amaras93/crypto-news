@@ -14,6 +14,7 @@ return [
     'daily_limit_microusd' => (int) env('AI_DAILY_LIMIT_MICROUSD', 1000000),
     'monthly_limit_microusd' => (int) env('AI_MONTHLY_LIMIT_MICROUSD', 10000000),
     'max_articles_per_day' => (int) env('AI_MAX_ARTICLES_PER_DAY', 1),
+    'max_generation_attempts_per_day' => (int) env('AI_MAX_GENERATION_ATTEMPTS_PER_DAY', 6),
     'max_translation_languages' => min(7, max(0, (int) env('AI_MAX_TRANSLATION_LANGUAGES', 7))),
     'max_concurrent_jobs' => min(5, max(1, (int) env('AI_MAX_CONCURRENT_JOBS', 1))),
     'max_input_tokens' => min(64000, max(2000, (int) env('AI_MAX_INPUT_TOKENS', 32000))),

@@ -12,6 +12,9 @@ class AiOutputSchema
 
     public function jsonSchema(AiGenerationRun $run): array
     {
+        if ($run->task === 'verification' && $run->schema_version === 'verification-v2') {
+            return app(AiSemanticVerification::class)->schema($run);
+        }
         if ($run->task === 'verification') {
             return $this->object(['version' => ['type' => 'string', 'enum' => ['verification-v1']],
                 'supported' => ['type' => 'boolean'], 'faithful_translation' => ['type' => 'boolean'],
@@ -47,6 +50,9 @@ class AiOutputSchema
 
     public function validate(array $document, AiGenerationRun $run): array
     {
+        if ($run->task === 'verification' && $run->schema_version === 'verification-v2') {
+            return app(AiSemanticVerification::class)->validate($document, $run);
+        }
         if ($run->task === 'verification') {
             return Validator::make($document, [
                 'version' => ['required', Rule::in(['verification-v1'])],

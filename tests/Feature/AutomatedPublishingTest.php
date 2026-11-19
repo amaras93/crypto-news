@@ -74,8 +74,7 @@ class AutomatedPublishingTest extends AiTestCase
         Http::preventStrayRequests();
         Http::fake(['api.openai.com/*' => function (Request $request) {
             $run = AiGenerationRun::where('status', AiRunStatus::Requesting)->latest('id')->firstOrFail();
-            $document = $run->task === 'verification' ? ['version' => 'verification-v1', 'supported' => true,
-                'faithful_translation' => true, 'original' => true, 'correct_language' => true, 'issues' => []]
+            $document = $run->task === 'verification' ? $this->verifiedDocument($run)
                 : app(FakeAiDraftProvider::class)->fixture($run);
             if ($run->task !== 'verification') {
                 foreach ($document['sections'] as &$section) {
@@ -382,8 +381,11 @@ class AutomatedPublishingTest extends AiTestCase
         $run = $this->draft();
         app(AiAutomation::class)->advance($run->article, $this->admin);
         $verification = AiGenerationRun::where('task', 'verification')->sole();
-        $this->fakeProvider($this->response($verification, ['version' => 'verification-v1', 'supported' => false,
-            'faithful_translation' => true, 'original' => true, 'correct_language' => true, 'issues' => ['Unsupported event assertion.']]));
+        $document = $this->verifiedDocument($verification);
+        $document['supported'] = false;
+        $document['assessments'][0]['verdict'] = 'absent';
+        $document['issues'] = ['Unsupported event assertion.'];
+        $this->fakeProvider($this->response($verification, $document));
         app(AiDrafting::class)->process($verification->id, false);
         app(AiDrafting::class)->validate($verification->id, false);
         app(AiAutomation::class)->advance($run->article->fresh(), $this->admin);
@@ -428,14 +430,19 @@ class AutomatedPublishingTest extends AiTestCase
         Http::assertSentCount(1);
     }
 
-    public function test_daily_publication_limit_holds_a_prepared_article_until_operator_attention(): void
+    public function test_daily_publication_limit_defers_paid_work_and_resumes_automatically_on_the_next_utc_day(): void
     {
         $run = $this->draft();
         EditorialEvent::create(['article_id' => $run->article_id, 'user_id' => $this->admin->id, 'action' => 'automatic_published']);
+        $this->artisan('ai:dispatch')->assertSuccessful();
+        $this->assertSame('processing', $run->article->fresh()->automation_status);
+        $this->assertDatabaseCount('ai_generation_runs', 1);
+        Http::assertSentCount(1);
+        $this->travel(1)->days();
         $article = $this->drain();
-        $this->assertSame('held', $article->automation_status);
-        $this->assertSame('daily_publication_limit', $article->automation_error);
-        $this->assertSame(0, Article::published()->count());
+        $this->assertSame(ArticleStatus::Published, $article->status);
+        $this->assertSame(8, $article->translations()->where('ai_review_status', 'automated')->count());
+        $this->assertSame(2, EditorialEvent::where('action', 'automatic_published')->count());
     }
 
     public function test_native_controls_save_automatic_mode_and_categories_but_server_caps_still_apply(): void
@@ -552,9 +559,9 @@ class AutomatedPublishingTest extends AiTestCase
         $this->assertSame(0, Article::published()->count());
     }
 
-    public function test_monthly_budget_and_daily_article_limit_cannot_be_bypassed_in_automatic_mode(): void
+    public function test_monthly_budget_and_daily_generation_attempt_limit_cannot_be_bypassed_in_automatic_mode(): void
     {
-        config(['ai.monthly_limit_microusd' => 1]);
+        config(['ai.monthly_limit_microusd' => 1, 'ai.max_generation_attempts_per_day' => 1]);
         $run = app(AiDrafting::class)->generate($this->admin, $this->candidate, dispatch: false, automated: true);
         app(AiDrafting::class)->process($run->id, false);
         $this->assertSame('budget_limit_or_allowance_exhausted', $run->fresh()->error_code);

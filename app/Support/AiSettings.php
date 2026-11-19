@@ -16,6 +16,7 @@ class AiSettings
             'scheduled_generation_enabled' => false, 'emergency_stop' => true, 'provider' => config('ai.provider'),
             'model' => config('ai.model'), 'daily_limit_microusd' => config('ai.daily_limit_microusd'),
             'monthly_limit_microusd' => config('ai.monthly_limit_microusd'), 'max_articles_per_day' => config('ai.max_articles_per_day'),
+            'max_generation_attempts_per_day' => config('ai.max_generation_attempts_per_day'),
             'max_concurrent_jobs' => config('ai.max_concurrent_jobs'), 'max_translation_languages' => config('ai.max_translation_languages'),
             'author_id' => null,
             'automatic_publishing' => false, 'enabled_category_ids' => [],
@@ -62,7 +63,7 @@ class AiSettings
         return $settings;
     }
 
-    /** @return array{daily: int, monthly: int, articles: int, concurrent: int, languages: int} */
+    /** @return array{daily: int, monthly: int, articles: int, attempts: int, concurrent: int, languages: int} */
     public function limits(): array
     {
         $current = $this->current();
@@ -71,6 +72,7 @@ class AiSettings
             'daily' => min((int) config('ai.daily_limit_microusd'), (int) $current['daily_limit_microusd']),
             'monthly' => min((int) config('ai.monthly_limit_microusd'), (int) $current['monthly_limit_microusd']),
             'articles' => min((int) config('ai.max_articles_per_day'), (int) $current['max_articles_per_day']),
+            'attempts' => min((int) config('ai.max_generation_attempts_per_day'), (int) $current['max_generation_attempts_per_day']),
             'concurrent' => max(1, min((int) config('ai.max_concurrent_jobs'), (int) $current['max_concurrent_jobs'])),
             'languages' => min((int) config('ai.max_translation_languages'), (int) $current['max_translation_languages']),
         ];
@@ -88,6 +90,7 @@ class AiSettings
             'daily_limit_microusd' => ['required', 'integer', 'between:0,1000000000000'],
             'monthly_limit_microusd' => ['required', 'integer', 'between:0,1000000000000'],
             'max_articles_per_day' => ['required', 'integer', 'between:0,1000'],
+            'max_generation_attempts_per_day' => ['sometimes', 'integer', 'between:0,1000'],
             'max_concurrent_jobs' => ['required', 'integer', 'between:1,5'],
             'max_translation_languages' => ['required', 'integer', 'between:0,7'],
             'author_id' => ['nullable', 'integer', 'exists:users,id'], 'automatic_publishing' => ['sometimes', 'boolean'],

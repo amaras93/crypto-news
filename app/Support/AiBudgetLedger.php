@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\CandidateStatus;
 use App\Models\AiBudgetPeriod;
+use App\Models\AiGenerationRun;
 use App\Models\AiSpendReservation;
 use App\Models\NewsCandidate;
 use App\Models\User;
@@ -75,12 +76,15 @@ class AiBudgetLedger
     {
         $dayLimit = min((int) config('ai.daily_limit_microusd'), $limits['daily'] ?? PHP_INT_MAX);
         $monthLimit = min((int) config('ai.monthly_limit_microusd'), $limits['monthly'] ?? PHP_INT_MAX);
-        $articleLimit = min((int) config('ai.max_articles_per_day'), $limits['articles'] ?? PHP_INT_MAX);
+        $articleLimit = min((int) config('ai.max_generation_attempts_per_day'), $limits['attempts'] ?? PHP_INT_MAX);
+        $sentAttempts = AiGenerationRun::where('is_simulated', false)->where('task', 'english')
+            ->where('request_sent_at', '>=', now()->utc()->startOfDay())->sum('request_count');
+        $attempts = max(($day?->actual_articles ?? 0) + ($day?->reserved_articles ?? 0), (int) $sentAttempts);
         if ($estimatedMicrousd <= 0 || $dayLimit <= 0 || $monthLimit <= 0 || $articleLimit <= 0
             || ($day?->actual_microusd ?? 0) + ($day?->reserved_microusd ?? 0) + $estimatedMicrousd > $dayLimit
             || ($month?->actual_microusd ?? 0) + ($month?->reserved_microusd ?? 0) + $estimatedMicrousd > $monthLimit
-            || ($countsArticle && ($day?->actual_articles ?? 0) + ($day?->reserved_articles ?? 0) >= $articleLimit)) {
-            throw ValidationException::withMessages(['budget' => 'The configured budget or daily article allowance is exhausted.']);
+            || ($countsArticle && $attempts >= $articleLimit)) {
+            throw ValidationException::withMessages(['budget' => 'The configured budget or daily generation attempt allowance is exhausted.']);
         }
     }
 

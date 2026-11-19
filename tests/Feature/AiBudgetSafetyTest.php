@@ -122,7 +122,7 @@ class AiBudgetSafetyTest extends TestCase
     public function test_monthly_and_article_limits_cannot_be_bypassed_by_multiple_request_keys(): void
     {
         $this->allowAccounting();
-        config(['ai.monthly_limit_microusd' => 200, 'ai.max_articles_per_day' => 1]);
+        config(['ai.monthly_limit_microusd' => 200, 'ai.max_generation_attempts_per_day' => 1]);
         $admin = User::factory()->admin()->create();
         $candidate = NewsCandidate::factory()->approvedForDraft()->create();
         $ledger = app(AiBudgetLedger::class);
@@ -140,7 +140,7 @@ class AiBudgetSafetyTest extends TestCase
     public function test_the_daily_allowance_resets_only_at_the_next_utc_day_without_erasing_monthly_spend(): void
     {
         $this->allowAccounting();
-        config(['ai.max_articles_per_day' => 1]);
+        config(['ai.max_generation_attempts_per_day' => 1]);
         $this->travelTo(CarbonImmutable::parse('2026-11-19T23:59:00Z'));
         $actor = User::factory()->admin()->create();
         $candidate = NewsCandidate::factory()->approvedForDraft()->create();

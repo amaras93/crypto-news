@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Support\AiDemoFixtures;
 use App\Support\AiDrafting;
 use App\Support\AiEditorialReviewService;
+use App\Support\AiSemanticVerification;
 use App\Support\FakeAiDraftProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Factory;
@@ -80,6 +81,21 @@ abstract class AiTestCase extends TestCase
             'output' => [['type' => 'message', 'content' => [['type' => 'output_text',
                 'text' => json_encode($document ?? app(FakeAiDraftProvider::class)->fixture($run), JSON_UNESCAPED_UNICODE)]]]],
             'usage' => $usage ?? ['input_tokens' => 800, 'input_tokens_details' => ['cached_tokens' => 200], 'output_tokens' => 400]];
+    }
+
+    protected function verifiedDocument(AiGenerationRun $run): array
+    {
+        $target = $run->article->translation($run->locale)->aiRun->output_document;
+        $claims = collect($run->evidence_snapshot['claims'])->keyBy('id');
+        $assessments = [];
+        foreach (app(AiSemanticVerification::class)->assertions($target) as $assertion) {
+            $id = $assertion['claim_ids'][0];
+            $assessments[] = ['field' => $assertion['field'], 'verdict' => 'supported',
+                'evidence' => [['claim_id' => $id, 'quote' => $claims[$id]['text']]], 'reason' => 'Supported by the supplied primary source.'];
+        }
+
+        return ['version' => 'verification-v2', 'supported' => true, 'faithful_translation' => true,
+            'original' => true, 'correct_language' => true, 'assessments' => $assessments, 'issues' => []];
     }
 
     protected function fakeProvider(array $body, int $status = 200, array $headers = []): void

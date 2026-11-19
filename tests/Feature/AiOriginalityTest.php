@@ -157,8 +157,8 @@ class AiOriginalityTest extends AiTestCase
     {
         $root = $this->copiedRun();
         if ($kind === 'articles') {
-            config(['ai.max_articles_per_day' => 1]);
-            AiPipelineSetting::find(1)->update(['max_articles_per_day' => 1]);
+            config(['ai.max_generation_attempts_per_day' => 1]);
+            AiPipelineSetting::find(1)->update(['max_generation_attempts_per_day' => 1]);
         } else {
             config(['ai.'.$kind.'_limit_microusd' => 1]);
         }
