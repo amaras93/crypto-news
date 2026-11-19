@@ -30,7 +30,8 @@ class AiQuality
         if ($letters < 30 || preg_match_all($script, $text) / $letters < 0.45) {
             $report['critical'][] = 'language_script_mismatch';
         }
-        $allowedEntities = collect($run->evidence_snapshot['claims'])->flatMap(fn (array $claim): array => $claim['entities'])->unique()->all();
+        $report['critical'] = array_merge($report['critical'], $this->provenanceIssues($document['slug'].' '.implode(' ', $document['suggested_tags']), $run->evidence_snapshot));
+        $allowedEntities = $this->allowedEntities($run->evidence_snapshot);
         foreach ($document['entities'] as $entity) {
             if (! in_array($entity, $allowedEntities, true)) {
                 $report['critical'][] = 'unsupported_entity:'.$entity;
@@ -75,6 +76,7 @@ class AiQuality
         $text = implode(' ', [$translation->title, $translation->excerpt ?? '', $translation->meta_title ?? '', $translation->meta_description ?? '', ...($translation->summary ?? []),
             app(ArticleContent::class)->render($translation->body)['text']]);
         $report = $this->text($text, $run->evidence_snapshot);
+        $report['critical'] = array_merge($report['critical'], $this->provenanceIssues($translation->slug, $run->evidence_snapshot));
         if ($run->is_automated) {
             $report['critical'] = array_merge($report['critical'], app(ArticleSeo::class)->automaticIssues($translation));
         }
@@ -91,7 +93,7 @@ class AiQuality
     /** @return array{critical: list<string>, warnings: list<string>, human_review_required: bool, checks_version: string} */
     public function text(string $text, array $evidence): array
     {
-        $critical = [];
+        $critical = $this->provenanceIssues($text, $evidence);
         $sourceText = implode(' ', array_column($evidence['claims'], 'text'));
         $figures = implode(' ', collect($evidence['claims'])->flatMap(fn (array $claim): array => $claim['figures'])->all());
         $allowedNumbers = $this->numbers($sourceText.' '.$figures);
@@ -134,7 +136,28 @@ class AiQuality
         return ['critical' => array_values(array_unique($critical)),
             'warnings' => ['Human verification of all facts, entities, currencies, symbols, forecasts and attribution is required.',
                 'Deterministic checks are screening, not independent semantic fact verification.'],
-            'human_review_required' => true, 'checks_version' => 'quality-v1'];
+            'human_review_required' => true, 'checks_version' => 'quality-v2'];
+    }
+
+    /** @return list<string> */
+    public function allowedEntities(array $evidence): array
+    {
+        return collect($evidence['claims'])->flatMap(fn (array $claim): array => $claim['entities'])->unique()->values()->all();
+    }
+
+    /** @return list<string> */
+    public function provenanceIssues(string $text, array $evidence): array
+    {
+        if (preg_match('/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/iu', $text)) {
+            return ['technical_evidence_id_in_public_text'];
+        }
+        foreach ($evidence['claims'] as $claim) {
+            if (filled($claim['id'] ?? null) && str_contains(mb_strtolower($text), mb_strtolower($claim['id']))) {
+                return ['technical_evidence_id_in_public_text'];
+            }
+        }
+
+        return [];
     }
 
     /** @return list<string> */

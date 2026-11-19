@@ -20,18 +20,26 @@ class AiOutputSchema
         }
         $claims = array_column($run->evidence_snapshot['claims'], 'id');
         $string = ['type' => 'string'];
-        $paragraph = $this->object(['text' => $string, 'claim_ids' => ['type' => 'array', 'items' => ['type' => 'string', 'enum' => $claims]]]);
-        $section = $this->object(['key' => ['type' => 'string', 'enum' => self::SECTIONS], 'heading' => $string,
-            'paragraphs' => ['type' => 'array', 'items' => $paragraph]]);
+        $publicText = $string + ['description' => 'Reader-facing plain text: no claim IDs, UUIDs, citation markers, markup or URLs. Use only verified facts and original wording.'];
+        $entities = app(AiQuality::class)->allowedEntities($run->evidence_snapshot);
+        $paragraph = $this->object(['text' => $publicText + ['minLength' => 50, 'maxLength' => 1800],
+            'claim_ids' => ['type' => 'array', 'minItems' => 1, 'maxItems' => 5,
+                'description' => 'Internal provenance only. Select the evidence IDs supporting every assertion in this paragraph. Never put these IDs in text.',
+                'items' => ['type' => 'string', 'enum' => $claims]]]);
+        $section = $this->object(['key' => ['type' => 'string', 'enum' => self::SECTIONS], 'heading' => $publicText + ['maxLength' => 100],
+            'paragraphs' => ['type' => 'array', 'minItems' => 1, 'maxItems' => 6, 'items' => $paragraph]]);
 
         return $this->object([
             'version' => ['type' => 'string', 'enum' => ['draft-v1']],
             'language' => ['type' => 'string', 'enum' => [$run->locale]],
-            'headline' => $string, 'excerpt' => $string, 'seo_title' => $string, 'seo_description' => $string,
-            'slug' => $string, 'takeaways' => ['type' => 'array', 'items' => $string],
-            'sections' => ['type' => 'array', 'items' => $section],
-            'entities' => ['type' => 'array', 'items' => $string],
-            'suggested_tags' => ['type' => 'array', 'items' => $string],
+            'headline' => $publicText + ['maxLength' => 200], 'excerpt' => $publicText + ['minLength' => 40, 'maxLength' => 500],
+            'seo_title' => $publicText + ['maxLength' => 100], 'seo_description' => $publicText + ['maxLength' => 250],
+            'slug' => $publicText + ['maxLength' => 160], 'takeaways' => ['type' => 'array', 'minItems' => 3, 'maxItems' => 5, 'items' => $publicText + ['maxLength' => 300]],
+            'sections' => ['type' => 'array', 'minItems' => 1, 'maxItems' => 4, 'items' => $section],
+            'entities' => ['type' => 'array', 'maxItems' => $entities === [] ? 0 : 30,
+                'description' => 'Only exact names from the verified entity allowlist that appear in this article. No dates, inferred aliases or new organizations.',
+                'items' => $entities === [] ? $string : $string + ['enum' => $entities]],
+            'suggested_tags' => ['type' => 'array', 'maxItems' => 8, 'items' => $publicText + ['maxLength' => 50]],
             'editorial_notes' => ['type' => 'array', 'items' => $string],
             'unsupported_claim_warnings' => ['type' => 'array', 'items' => $string],
         ]);

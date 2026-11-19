@@ -1,0 +1,100 @@
+{
+    "document": {
+        "version": "draft-v1",
+        "language": "en",
+        "headline": "Federal Reserve Releases Minutes From October 27–28, 2026 FOMC Meeting",
+        "excerpt": "The Federal Reserve published the minutes of the Federal Open Market Committee meeting held on October 27–28, 2026, noting that such records are generally released three weeks after a policy decision.",
+        "seo_title": "Federal Reserve Releases Minutes From October 27–28, 2026 FOMC Meeting",
+        "seo_description": "The Federal Reserve published minutes from the October 27–28, 2026 FOMC meeting and said minutes are generally released three weeks after policy decisions.",
+        "slug": "federal-reserve-releases-minutes-from-october-27-28-2026-fomc-meeting",
+        "takeaways": [
+            "The Federal Reserve released the minutes of the October 27–28, 2026 Federal Open Market Committee meeting.",
+            "The Fed said regularly scheduled meeting minutes are generally published three weeks after the policy decision.",
+            "The central bank said the minutes reflect information available to the Committee at the time of the meeting."
+        ],
+        "sections": [
+            {
+                "key": "story",
+                "heading": "Federal Reserve posts October meeting minutes",
+                "paragraphs": [
+                    {
+                        "text": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting held on October 27–28, 2026. The announcement was posted by the Board of Governors of the Federal Reserve System. [11111111-aaaa-4aaa-8aaa-111111111111]",
+                        "claim_ids": [
+                            "11111111-aaaa-4aaa-8aaa-111111111111"
+                        ]
+                    },
+                    {
+                        "text": "In its release, the central bank said minutes for each regularly scheduled meeting of the Committee are generally published three weeks after the day of the policy decision. It also said the descriptions of economic and financial conditions in the minutes are based solely on information available to the Committee at the time of the meeting. [22222222-bbbb-4bbb-8bbb-222222222222]",
+                        "claim_ids": [
+                            "22222222-bbbb-4bbb-8bbb-222222222222"
+                        ]
+                    }
+                ]
+            }
+        ],
+        "entities": [
+            "Federal Reserve",
+            "Federal Open Market Committee",
+            "Board of Governors of the Federal Reserve System",
+            "October 27–28, 2026"
+        ],
+        "suggested_tags": [
+            "Federal Reserve",
+            "FOMC",
+            "minutes",
+            "monetary policy",
+            "Board of Governors"
+        ],
+        "editorial_notes": [
+            "This brief is based only on the supplied Federal Reserve release and does not add details about the meeting outcome or market reaction."
+        ],
+        "unsupported_claim_warnings": []
+    },
+    "evidence": {
+        "claims": [
+            {
+                "id": "11111111-aaaa-4aaa-8aaa-111111111111",
+                "text": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026.",
+                "entities": [
+                    "Federal Reserve",
+                    "Wednesday",
+                    "Federal Open Market Committee",
+                    "October"
+                ],
+                "figures": [
+                    "2026",
+                    "27",
+                    "28"
+                ],
+                "material": true,
+                "verified_at": null,
+                "verification_method": "automated_primary",
+                "automated_verified_at": "2026-11-19T14:25:21+00:00",
+                "references": [
+                    {
+                        "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261118a.htm",
+                        "publisher": "Board of Governors of the Federal Reserve System"
+                    }
+                ]
+            },
+            {
+                "id": "22222222-bbbb-4bbb-8bbb-222222222222",
+                "text": "The minutes for each regularly scheduled meeting of the Committee are generally published three weeks after the day of the policy decision. The descriptions of economic and financial conditions contained in these minutes are based solely on the information that was available to the Committee at the time of the meeting.",
+                "entities": [
+                    "Committee"
+                ],
+                "figures": [],
+                "material": true,
+                "verified_at": null,
+                "verification_method": "automated_primary",
+                "automated_verified_at": "2026-11-19T14:25:21+00:00",
+                "references": [
+                    {
+                        "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261118a.htm",
+                        "publisher": "Board of Governors of the Federal Reserve System"
+                    }
+                ]
+            }
+        ]
+    }
+}

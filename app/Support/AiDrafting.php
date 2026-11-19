@@ -227,7 +227,8 @@ class AiDrafting
                 $this->authorize($record);
                 if (! $record->is_simulated) {
                     $rates = $this->pricing->snapshot($record->model);
-                    $estimate = $this->pricing->reservation($payload, $this->schema->jsonSchema($record), $rates);
+                    $estimate = $this->pricing->reservation($payload, $this->schema->jsonSchema($record), $rates,
+                        app(OpenAiDraftProvider::class)->instructions($record));
                     $reservation = $this->ledger->reserve($record->billingUser, $record->candidate, $record->request_key,
                         $estimate, $this->settings->limits(), $record->task === 'english');
                     $reservation->forceFill(['provider' => $record->provider, 'model' => $record->model])->save();
@@ -288,6 +289,9 @@ class AiDrafting
                 $run->active_key = null;
                 $run->error_code = 'critical_quality_failure';
                 $run->completed_at = now();
+                if ($run->is_automated && $run->task === 'english' && ! $run->article_id) {
+                    $run->candidate->forceFill(['automation_status' => 'held', 'automation_error' => 'critical_quality_failure'])->save();
+                }
             }
             $run->save();
         });
@@ -304,6 +308,12 @@ class AiDrafting
                 throw new AiFailure('critical_quality_failure');
             }
             $document = $run->output_document;
+            if ($run->task !== 'verification') {
+                $document = $this->schema->validate($document ?? [], $run);
+                if ($this->quality->document($document, $run)['critical']) {
+                    throw new AiFailure('critical_quality_failure');
+                }
+            }
             if ($run->task === 'verification') {
                 app(AiAutomation::class)->accept($run);
             } elseif ($run->task !== 'section') {
@@ -456,7 +466,12 @@ class AiDrafting
             'references' => array_map(fn (array $reference): array => Arr::only($reference,
                 ['url', 'publisher', 'source_timestamp', 'retrieved_at', 'primary']), $claim['references']),
         ], $run->evidence_snapshot['claims']);
-        $payload = ['task' => $run->task, 'language' => $run->locale, 'section' => $run->section_key, 'claims' => $claims];
+        $payload = ['task' => $run->task, 'language' => $run->locale, 'section' => $run->section_key, 'claims' => $claims,
+            'editorial_constraints' => ['allowed_entities' => $this->quality->allowedEntities($run->evidence_snapshot),
+                'allowed_numerical_strings' => $this->quality->numbers(implode(' ', array_column($claims, 'text')).' '
+                    .implode(' ', collect($claims)->flatMap(fn (array $claim): array => $claim['figures'])->all())),
+                'claim_ids_location' => 'sections[].paragraphs[].claim_ids only; never public text',
+                'minimum_distinct_paragraphs' => 2, 'maximum_consecutive_source_words' => 11]];
         if ($run->task !== 'english') {
             $english = $run->article->fresh(['translations'])->translation('en');
             $payload['english'] = $english->only(['title', 'slug', 'excerpt', 'summary', 'body', 'meta_title', 'meta_description']);
@@ -467,6 +482,9 @@ class AiDrafting
         }
         if ($run->task === 'verification') {
             $target = $run->article->fresh(['translations'])->translation($run->locale);
+            if (! $target?->aiRun || $this->quality->saved($target, $target->aiRun)['critical']) {
+                throw new AiFailure('verification_preflight_failed');
+            }
             $payload['target'] = $target->only(['title', 'slug', 'excerpt', 'summary', 'body', 'meta_title', 'meta_description']);
         }
 

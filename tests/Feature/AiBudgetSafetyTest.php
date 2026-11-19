@@ -9,6 +9,7 @@ use App\Support\AiBudgetLedger;
 use App\Support\AiDrafting;
 use App\Support\AiDraftProvider;
 use App\Support\AiFailure;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -134,6 +135,29 @@ class AiBudgetSafetyTest extends TestCase
         $ledger->reserve($admin, $candidate, Str::uuid()->toString(), 100);
         $this->expectException(ValidationException::class);
         $ledger->reserve($admin, $candidate, Str::uuid()->toString(), 1);
+    }
+
+    public function test_the_daily_allowance_resets_only_at_the_next_utc_day_without_erasing_monthly_spend(): void
+    {
+        $this->allowAccounting();
+        config(['ai.max_articles_per_day' => 1]);
+        $this->travelTo(CarbonImmutable::parse('2026-11-19T23:59:00Z'));
+        $actor = User::factory()->admin()->create();
+        $candidate = NewsCandidate::factory()->approvedForDraft()->create();
+        $ledger = app(AiBudgetLedger::class);
+        $reservation = $ledger->reserve($actor, $candidate, Str::uuid()->toString(), 100);
+        $ledger->settle($actor, $reservation, 80);
+        try {
+            $ledger->reserve($actor, $candidate, Str::uuid()->toString(), 100);
+            $this->fail('A second article was admitted before midnight UTC.');
+        } catch (ValidationException) {
+            $this->assertDatabaseCount('ai_spend_reservations', 1);
+        }
+        $this->travelTo(CarbonImmutable::parse('2026-11-20T00:00:00Z'));
+        $next = $ledger->reserve($actor, $candidate, Str::uuid()->toString(), 100);
+        $this->assertSame('day:2026-11-20', $next->day_key);
+        $this->assertSame(1, AiBudgetPeriod::where('period_key', 'day:2026-11-19')->sole()->actual_articles);
+        $this->assertSame(80, AiBudgetPeriod::where('period_key', 'month:2026-11')->sole()->actual_microusd);
     }
 
     public function test_readers_and_editors_cannot_reserve_budget(): void

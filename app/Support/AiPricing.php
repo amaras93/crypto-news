@@ -51,10 +51,10 @@ class AiPricing
             + $this->component($output, $rates['output']);
     }
 
-    public function reservation(array $payload, array $schema, array $rates): int
+    public function reservation(array $payload, array $schema, array $rates, string $instructions = ''): int
     {
         $upper = strlen(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR))
-            + strlen(json_encode($schema, JSON_THROW_ON_ERROR)) + 2048;
+            + strlen(json_encode($schema, JSON_THROW_ON_ERROR)) + strlen($instructions) + 2048;
         if ($upper > config('ai.max_input_tokens')) {
             throw new AiFailure('input_limit_exceeded');
         }

@@ -120,6 +120,38 @@ class AutomatedPublishingTest extends AiTestCase
         $this->fail('Automatic workflow failed to reach a terminal state.');
     }
 
+    public function test_a_target_with_leaked_provenance_is_rejected_before_a_paid_verification_request(): void
+    {
+        $article = $this->draft()->article;
+        $translation = $article->translation('en');
+        $translation->forceFill(['body' => $translation->body.'<p>'.$article->aiRun->evidence_snapshot['claims'][0]['id'].'</p>'])->save();
+        $run = app(AiDrafting::class)->verify($this->admin, $article->fresh(), 'en');
+        app(AiDrafting::class)->process($run->id, false);
+        $this->assertSame(AiRunStatus::Failed, $run->fresh()->status);
+        $this->assertSame('verification_preflight_failed', $run->fresh()->error_code);
+        $this->assertSame(0, $run->fresh()->request_count);
+        $this->assertNull($run->fresh()->reservation_id);
+        Http::assertSentCount(1);
+        $this->assertSame(0, Article::published()->count());
+    }
+
+    public function test_a_quality_blocked_english_candidate_is_held_without_automatic_regeneration(): void
+    {
+        $run = app(AiDrafting::class)->generate($this->admin, $this->candidate, dispatch: false, automated: true);
+        $document = app(FakeAiDraftProvider::class)->fixture($run);
+        $document['headline'] .= ' '.$run->evidence_snapshot['claims'][0]['id'];
+        Http::fake(['api.openai.com/*' => Http::response($this->response($run, $document))]);
+        app(AiDrafting::class)->process($run->id, false);
+        app(AiDrafting::class)->validate($run->id, false);
+        $this->assertSame(AiRunStatus::QualityBlocked, $run->fresh()->status);
+        $this->assertSame('held', $this->candidate->fresh()->automation_status);
+        $this->assertSame('critical_quality_failure', $this->candidate->fresh()->automation_error);
+        $this->artisan('ai:dispatch')->assertSuccessful();
+        Http::assertSentCount(1);
+        $this->assertDatabaseCount('ai_generation_runs', 1);
+        $this->assertDatabaseCount('articles', 0);
+    }
+
     public function test_discovery_to_publication_completes_eight_languages_without_human_review(): void
     {
         DiscoverySetting::factory()->create(['enabled' => true]);
