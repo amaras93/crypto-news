@@ -12,7 +12,9 @@ class AiRecovery
 {
     public function plan(AiGenerationRun $run): ?string
     {
-        if (($run->quality_report['recovery']['state'] ?? null) === 'held' && ($run->quality_report['recovery']['reason'] ?? null) !== 'recovery_budget_unavailable') {
+        $inconsistent = $run->task === 'verification' && $run->schema_version === 'verification-v2'
+            && app(AiSemanticVerification::class)->inconsistent($run->output_document ?? []);
+        if (! $inconsistent && ($run->quality_report['recovery']['state'] ?? null) === 'held' && ($run->quality_report['recovery']['reason'] ?? null) !== 'recovery_budget_unavailable') {
             return null;
         }
         if (! $run->is_automated || $run->is_simulated || $run->children()->exists()
@@ -20,7 +22,7 @@ class AiRecovery
             return null;
         }
         if ($run->article_id && AiGenerationRun::where('article_id', $run->article_id)->where('locale', $run->locale)
-            ->whereNotNull('parent_run_id')->count() >= 2) {
+            ->where('task', $run->task)->whereNotNull('parent_run_id')->count() >= 2) {
             return null;
         }
         if ($run->status === AiRunStatus::Failed && in_array($run->error_code, ['invalid_structured_output', 'incomplete_response'], true)) {
@@ -41,9 +43,13 @@ class AiRecovery
             if (array_intersect($critical, ['semantic_contradicted', 'semantic_absent']) !== []) {
                 return null;
             }
+            if ($inconsistent) {
+                return 'verification_correction';
+            }
             $document = $run->output_document;
             if ($run->locale !== 'en' && ($document['faithful_translation'] === false || $document['correct_language'] === false || $document['original'] === false)) {
-                return 'translation_correction';
+                return AiGenerationRun::where('article_id', $run->article_id)->where('locale', $run->locale)
+                    ->where('task', 'translation')->whereNotNull('parent_run_id')->count() < 2 ? 'translation_correction' : null;
             }
             if (array_intersect($critical, ['semantic_uncertain', 'semantic_evidence_reference_invalid', 'semantic_field_coverage_incomplete', 'semantic_evidence_missing']) !== []) {
                 return 'verification_correction';
@@ -72,7 +78,9 @@ class AiRecovery
         foreach (AiGenerationRun::where('is_automated', true)->whereIn('status', [AiRunStatus::QualityBlocked, AiRunStatus::Failed])
             ->whereDoesntHave('children')->where('attempt', '<', config('ai.max_attempts'))
             ->where(fn ($query) => $query->whereNull('quality_report->recovery->state')->orWhere('quality_report->recovery->state', 'available')
-                ->orWhere('quality_report->recovery->reason', 'recovery_budget_unavailable'))->oldest('id')->limit(50)->get() as $run) {
+                ->orWhere('quality_report->recovery->reason', 'recovery_budget_unavailable')
+                ->orWhere(fn ($verifier) => $verifier->where('task', 'verification')->where('schema_version', 'verification-v2')
+                    ->where('quality_report->recovery->reason', 'critical_quality_failure')))->oldest('id')->limit(50)->get() as $run) {
             if (! $run->article_id && (Article::where('automation_status', 'processing')->exists()
                 || AiGenerationRun::where('task', 'english')->where('news_candidate_id', '<>', $run->news_candidate_id)
                     ->whereIn('status', [AiRunStatus::Queued, AiRunStatus::Requesting, AiRunStatus::Received, AiRunStatus::Validated])->exists())) {

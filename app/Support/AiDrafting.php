@@ -480,9 +480,12 @@ class AiDrafting
                 'instruction' => 'Recompose affected sentences and all public metadata from verified claims; the rejected draft is not evidence. Preserve facts and internal claim_ids. Do not delete overlapping words as a shortcut.'];
         }
         if ($run->parent_run_id && $run->parent && $run->parent->error_code !== 'originality_correction_queued') {
-            $payload['correction'] = ['failed_task' => $run->parent->task, 'failed_locale' => $run->parent->locale,
-                'rejected_document' => $run->parent->output_document, 'diagnostics' => $run->parent->quality_report,
-                'error' => $run->parent->error_code];
+            $payload['correction'] = $run->parent->task === 'verification'
+                ? ['failed_task' => $run->parent->task, 'failed_locale' => $run->parent->locale,
+                    'diagnostics' => app(AiSemanticVerification::class)->failureContext($run->parent->output_document ?? [], $run->parent->quality_report ?? [])]
+                : ['failed_task' => $run->parent->task, 'failed_locale' => $run->parent->locale,
+                    'rejected_document' => $run->parent->output_document, 'diagnostics' => $run->parent->quality_report,
+                    'error' => $run->parent->error_code];
         }
         if ($run->task !== 'english') {
             $english = $run->article->fresh(['translations'])->translation('en');

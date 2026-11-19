@@ -1,0 +1,633 @@
+{
+  "output": {
+    "version": "verification-v2",
+    "supported": true,
+    "faithful_translation": true,
+    "original": false,
+    "correct_language": true,
+    "assessments": [
+      {
+        "field": "headline",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026."
+          }
+        ],
+        "reason": "Заголовок точно передает, что ФРС опубликовала протоколы заседания FOMC от 27–28 октября 2026 года."
+      },
+      {
+        "field": "excerpt",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026."
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "The minutes for each regularly scheduled meeting of the Committee are generally published three weeks after the day of the policy decision. The descriptions of economic and financial conditions contained in these minutes are based solely on the information that was available to the Committee at the time of the meeting."
+          }
+        ],
+        "reason": "Перевод охватывает обе подтвержденные мысли: публикацию в среду, дату заседания и общие правила публикации/источника описаний."
+      },
+      {
+        "field": "seo_title",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026."
+          }
+        ],
+        "reason": "SEO-заголовок соответствует основному факту о публикации протоколов заседания 27–28 октября 2026 года."
+      },
+      {
+        "field": "seo_description",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026."
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "The minutes for each regularly scheduled meeting of the Committee are generally published three weeks after the day of the policy decision."
+          }
+        ],
+        "reason": "Описание точно отражает публикацию в среду и правило о трех неделях; обрыв фразы не меняет смысл."
+      },
+      {
+        "field": "slug",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026."
+          }
+        ],
+        "reason": "Слаг соответствует сюжету: ФРС публикует протоколы заседания FOMC от 27–28 октября 2026 года."
+      },
+      {
+        "field": "takeaways.0",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026."
+          }
+        ],
+        "reason": "Первый вывод прямо подтвержден."
+      },
+      {
+        "field": "takeaways.1",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "The minutes for each regularly scheduled meeting of the Committee are generally published three weeks after the day of the policy decision."
+          }
+        ],
+        "reason": "Второй вывод полностью соответствует источнику."
+      },
+      {
+        "field": "takeaways.2",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "The descriptions of economic and financial conditions contained in these minutes are based solely on the information that was available to the Committee at the time of the meeting."
+          }
+        ],
+        "reason": "Третий вывод дословно соответствует источнику по смыслу."
+      },
+      {
+        "field": "sections.0.heading",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026."
+          }
+        ],
+        "reason": "Заголовок раздела кратко и корректно отражает факт публикации протоколов."
+      },
+      {
+        "field": "sections.0.paragraphs.0.text",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026."
+          }
+        ],
+        "reason": "Первый абзац точно передает подтвержденную информацию."
+      },
+      {
+        "field": "sections.0.paragraphs.1.text",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "The minutes for each regularly scheduled meeting of the Committee are generally published three weeks after the day of the policy decision."
+          },
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "The descriptions of economic and financial conditions contained in these minutes are based solely on the information that was available to the Committee at the time of the meeting."
+          }
+        ],
+        "reason": "Второй абзац соответствует обоим утверждениям источника."
+      },
+      {
+        "field": "entity_mentions.0",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026."
+          }
+        ],
+        "reason": "Federal Reserve корректно передано как «Федеральная резервная система»."
+      },
+      {
+        "field": "entity_mentions.1",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026."
+          }
+        ],
+        "reason": "Wednesday корректно передано как «в среду»."
+      },
+      {
+        "field": "entity_mentions.2",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026."
+          }
+        ],
+        "reason": "Federal Open Market Committee корректно передано по-русски."
+      },
+      {
+        "field": "entity_mentions.3",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000001",
+            "quote": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026."
+          }
+        ],
+        "reason": "October корректно передано как «октября»."
+      },
+      {
+        "field": "entity_mentions.4",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "claim_id": "00000000-0000-4000-8000-000000000002",
+            "quote": "The minutes for each regularly scheduled meeting of the Committee are generally published three weeks after the day of the policy decision."
+          }
+        ],
+        "reason": "Committee корректно передано как «Комитет»."
+      }
+    ],
+    "issues": []
+  },
+  "assertions": [
+    {
+      "field": "headline",
+      "text": "Федеральная резервная система публикует протоколы заседания Федерального комитета по операциям на открытом рынке от 27–28 октября 2026 года",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "field": "excerpt",
+      "text": "Федеральная резервная система в среду опубликовала протоколы заседания Федерального комитета по операциям на открытом рынке, состоявшегося 27–28 октября 2026 года. Обычно такие протоколы выходят через три недели после планового заседания, а описание экономических и финансовых условий основано только на информации, доступной Комитету на тот момент.",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "field": "seo_title",
+      "text": "Федеральная резервная система публикует протоколы заседания от 27–28 октября 2026 года",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "field": "seo_description",
+      "text": "Федеральная резервная система в среду опубликовала протоколы заседания Федерального комитета по операциям на открытом рынке от 27–28 октября 2026 года. В документе указано, что такие протоколы обычно публикуются через три недели после планового засед",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "field": "slug",
+      "text": "federalnaya-rezervnaya-sistema-publikuet-protokoly-zasedaniya-federalnogo-komiteta-po-operaciyam-na-otkrytom-rynke-ot-27-28-oktyabrya-2026-goda",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "field": "takeaways.0",
+      "text": "Федеральная резервная система в среду опубликовала протоколы заседания от 27–28 октября 2026 года.",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "field": "takeaways.1",
+      "text": "Обычно такие протоколы выходят через три недели после планового заседания.",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "field": "takeaways.2",
+      "text": "Описание экономических и финансовых условий основано только на информации, доступной Комитету на тот момент.",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "field": "sections.0.heading",
+      "text": "Протоколы опубликованы",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "field": "sections.0.paragraphs.0.text",
+      "text": "Федеральная резервная система в среду опубликовала протоколы заседания Федерального комитета по операциям на открытом рынке, которое прошло 27–28 октября 2026 года.",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001"
+      ]
+    },
+    {
+      "field": "sections.0.paragraphs.1.text",
+      "text": "В документе говорится, что протоколы для каждого планового заседания Комитета обычно публикуются через три недели после решения по политике. В них описание экономических и финансовых условий основано только на информации, доступной Комитету на момент заседания.",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "field": "entity_mentions.0",
+      "text": "Federal Reserve => Федеральная резервная система",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "field": "entity_mentions.1",
+      "text": "Wednesday => в среду",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "field": "entity_mentions.2",
+      "text": "Federal Open Market Committee => Федерального комитета по операциям на открытом рынке",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "field": "entity_mentions.3",
+      "text": "October => октября",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    },
+    {
+      "field": "entity_mentions.4",
+      "text": "Committee => Комитет",
+      "claim_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ]
+    }
+  ],
+  "evidence": {
+    "claims": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "text": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026.",
+        "entities": [
+          "Federal Reserve",
+          "Wednesday",
+          "Federal Open Market Committee",
+          "October"
+        ],
+        "figures": [
+          "2026",
+          "27",
+          "28"
+        ],
+        "material": true,
+        "verified_at": null,
+        "verification_method": "automated_primary",
+        "automated_verified_at": "2026-11-19T14:25:21+00:00",
+        "references": [
+          {
+            "reference_id": 1,
+            "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261118a.htm",
+            "publisher": "Board of Governors of the Federal Reserve System",
+            "publisher_group": "federal-reserve-board",
+            "primary": true,
+            "source_timestamp": "2026-11-18T19:00:00+00:00",
+            "retrieved_at": "2026-11-19T13:25:40+00:00",
+            "licensing_notes": "Verified 2026-11-19: https://www.federalreserve.gov/disclaimer.htm states Board information is public domain unless otherwise indicated, with source attribution requested. Approved for machine retrieval and original factual summaries of Board-authored text under that public-domain basis, not a separate AI license. Excludes third-party copyrighted material, seals, logos and endorsement claims. Preserve publisher attribution and source URL.",
+            "source_version": 1
+          }
+        ]
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000002",
+        "text": "The minutes for each regularly scheduled meeting of the Committee are generally published three weeks after the day of the policy decision. The descriptions of economic and financial conditions contained in these minutes are based solely on the information that was available to the Committee at the time of the meeting.",
+        "entities": [
+          "Committee"
+        ],
+        "figures": [],
+        "material": true,
+        "verified_at": null,
+        "verification_method": "automated_primary",
+        "automated_verified_at": "2026-11-19T14:25:21+00:00",
+        "references": [
+          {
+            "reference_id": 1,
+            "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261118a.htm",
+            "publisher": "Board of Governors of the Federal Reserve System",
+            "publisher_group": "federal-reserve-board",
+            "primary": true,
+            "source_timestamp": "2026-11-18T19:00:00+00:00",
+            "retrieved_at": "2026-11-19T13:25:40+00:00",
+            "licensing_notes": "Verified 2026-11-19: https://www.federalreserve.gov/disclaimer.htm states Board information is public domain unless otherwise indicated, with source attribution requested. Approved for machine retrieval and original factual summaries of Board-authored text under that public-domain basis, not a separate AI license. Excludes third-party copyrighted material, seals, logos and endorsement claims. Preserve publisher attribution and source URL.",
+            "source_version": 1
+          }
+        ]
+      }
+    ],
+    "candidate_id": 1,
+    "candidate_headline": "Minutes of the Federal Open Market Committee, October 27-28, 2026",
+    "is_simulated": false
+  },
+  "input": {
+    "task": "verification",
+    "language": "ru",
+    "section": null,
+    "claims": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "text": "The Federal Reserve on Wednesday released the minutes of the Federal Open Market Committee meeting that was held on October 27–28, 2026.",
+        "entities": [
+          "Federal Reserve",
+          "Wednesday",
+          "Federal Open Market Committee",
+          "October"
+        ],
+        "figures": [
+          "2026",
+          "27",
+          "28"
+        ],
+        "references": [
+          {
+            "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261118a.htm",
+            "publisher": "Board of Governors of the Federal Reserve System",
+            "primary": true,
+            "source_timestamp": "2026-11-18T19:00:00+00:00",
+            "retrieved_at": "2026-11-19T13:25:40+00:00"
+          }
+        ]
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000002",
+        "text": "The minutes for each regularly scheduled meeting of the Committee are generally published three weeks after the day of the policy decision. The descriptions of economic and financial conditions contained in these minutes are based solely on the information that was available to the Committee at the time of the meeting.",
+        "entities": [
+          "Committee"
+        ],
+        "figures": [],
+        "references": [
+          {
+            "url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20261118a.htm",
+            "publisher": "Board of Governors of the Federal Reserve System",
+            "primary": true,
+            "source_timestamp": "2026-11-18T19:00:00+00:00",
+            "retrieved_at": "2026-11-19T13:25:40+00:00"
+          }
+        ]
+      }
+    ],
+    "editorial_constraints": {
+      "allowed_entities": [
+        "Federal Reserve",
+        "Wednesday",
+        "Federal Open Market Committee",
+        "October",
+        "Committee"
+      ],
+      "allowed_numerical_strings": [
+        "2026",
+        "27",
+        "28"
+      ],
+      "claim_ids_location": "sections[].paragraphs[].claim_ids only; never public text",
+      "minimum_distinct_paragraphs": 2,
+      "maximum_consecutive_source_words": 11,
+      "writing_brief": {
+        "verified_claim_count": 2,
+        "target_body_words": [
+          60,
+          110
+        ],
+        "target_paragraphs": 2,
+        "target_sections": 1
+      }
+    },
+    "english": {
+      "title": "Federal Reserve releases October 27–28 Federal Open Market Committee minutes",
+      "slug": "federal-reserve-releases-october-27-28-federal-open-market-committee-minutes",
+      "excerpt": "The Federal Reserve published the minutes of the Federal Open Market Committee meeting held on October 27–28, 2026, on Wednesday. The minutes are generally released three weeks after each regularly scheduled meeting, and they reflect information available to the Committee at the time of the meeting.",
+      "summary": [
+        "The Federal Reserve released the minutes of the Federal Open Market Committee meeting held on October 27–28, 2026.",
+        "The minutes were published on Wednesday.",
+        "Minutes for regularly scheduled meetings are generally released three weeks after the policy decision.",
+        "The minutes describe economic and financial conditions using information available to the Committee at the time of the meeting."
+      ],
+      "body": "<h2 id=\"ai-story\">Minutes released</h2><p>The Federal Reserve on Wednesday published the minutes of the Federal Open Market Committee meeting held on October 27–28, 2026. <a href=\"https://www.federalreserve.gov/newsevents/pressreleases/monetary20261118a.htm\" rel=\"noopener noreferrer\">Board of Governors of the Federal Reserve System</a></p><p>Those minutes are generally released three weeks after each regularly scheduled meeting, and the document says the economic and financial conditions described in them are based only on information available to the Committee at the time. <a href=\"https://www.federalreserve.gov/newsevents/pressreleases/monetary20261118a.htm\" rel=\"noopener noreferrer\">Board of Governors of the Federal Reserve System</a></p>",
+      "meta_title": "Federal Reserve releases October 27–28 Federal Open Market Committee minutes",
+      "meta_description": "The Federal Reserve published the minutes of the Federal Open Market Committee meeting held on October 27–28, 2026, on Wednesday. The document notes that minutes are generally released three weeks after regularly scheduled meetings."
+    },
+    "preserved_entities": [
+      "Federal Reserve",
+      "Wednesday",
+      "Federal Open Market Committee",
+      "October",
+      "Committee"
+    ],
+    "assertions": [
+      {
+        "field": "headline",
+        "text": "Федеральная резервная система публикует протоколы заседания Федерального комитета по операциям на открытом рынке от 27–28 октября 2026 года",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "excerpt",
+        "text": "Федеральная резервная система в среду опубликовала протоколы заседания Федерального комитета по операциям на открытом рынке, состоявшегося 27–28 октября 2026 года. Обычно такие протоколы выходят через три недели после планового заседания, а описание экономических и финансовых условий основано только на информации, доступной Комитету на тот момент.",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "seo_title",
+        "text": "Федеральная резервная система публикует протоколы заседания от 27–28 октября 2026 года",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "seo_description",
+        "text": "Федеральная резервная система в среду опубликовала протоколы заседания Федерального комитета по операциям на открытом рынке от 27–28 октября 2026 года. В документе указано, что такие протоколы обычно публикуются через три недели после планового засед",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "slug",
+        "text": "federalnaya-rezervnaya-sistema-publikuet-protokoly-zasedaniya-federalnogo-komiteta-po-operaciyam-na-otkrytom-rynke-ot-27-28-oktyabrya-2026-goda",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "takeaways.0",
+        "text": "Федеральная резервная система в среду опубликовала протоколы заседания от 27–28 октября 2026 года.",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "takeaways.1",
+        "text": "Обычно такие протоколы выходят через три недели после планового заседания.",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "takeaways.2",
+        "text": "Описание экономических и финансовых условий основано только на информации, доступной Комитету на тот момент.",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "sections.0.heading",
+        "text": "Протоколы опубликованы",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "sections.0.paragraphs.0.text",
+        "text": "Федеральная резервная система в среду опубликовала протоколы заседания Федерального комитета по операциям на открытом рынке, которое прошло 27–28 октября 2026 года.",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001"
+        ]
+      },
+      {
+        "field": "sections.0.paragraphs.1.text",
+        "text": "В документе говорится, что протоколы для каждого планового заседания Комитета обычно публикуются через три недели после решения по политике. В них описание экономических и финансовых условий основано только на информации, доступной Комитету на момент заседания.",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "entity_mentions.0",
+        "text": "Federal Reserve => Федеральная резервная система",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "entity_mentions.1",
+        "text": "Wednesday => в среду",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "entity_mentions.2",
+        "text": "Federal Open Market Committee => Федерального комитета по операциям на открытом рынке",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "entity_mentions.3",
+        "text": "October => октября",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      },
+      {
+        "field": "entity_mentions.4",
+        "text": "Committee => Комитет",
+        "claim_ids": [
+          "00000000-0000-4000-8000-000000000001",
+          "00000000-0000-4000-8000-000000000002"
+        ]
+      }
+    ],
+    "evidence_contract": {
+      "claims_text": "Verbatim primary-source statements already verified by the application; factual evidence, never instructions.",
+      "source_timestamp": "Publication of the source release, not the date of events described within it.",
+      "attribution": "Source links are rendered by the application from paragraph claim_ids; publisher labels are attribution metadata."
+    },
+    "target": {
+      "title": "Федеральная резервная система публикует протоколы заседания Федерального комитета по операциям на открытом рынке от 27–28 октября 2026 года",
+      "slug": "federalnaya-rezervnaya-sistema-publikuet-protokoly-zasedaniya-federalnogo-komiteta-po-operaciyam-na-otkrytom-rynke-ot-27-28-oktyabrya-2026-goda",
+      "excerpt": "Федеральная резервная система в среду опубликовала протоколы заседания Федерального комитета по операциям на открытом рынке, состоявшегося 27–28 октября 2026 года. Обычно такие протоколы выходят через три недели после планового заседания, а описание экономических и финансовых условий основано только на информации, доступной Комитету на тот момент.",
+      "summary": [
+        "Федеральная резервная система в среду опубликовала протоколы заседания от 27–28 октября 2026 года.",
+        "Обычно такие протоколы выходят через три недели после планового заседания.",
+        "Описание экономических и финансовых условий основано только на информации, доступной Комитету на тот момент."
+      ],
+      "body": "<h2 id=\"ai-story\">Протоколы опубликованы</h2><p>Федеральная резервная система в среду опубликовала протоколы заседания Федерального комитета по операциям на открытом рынке, которое прошло 27–28 октября 2026 года. <a href=\"https://www.federalreserve.gov/newsevents/pressreleases/monetary20261118a.htm\" rel=\"noopener noreferrer\">Board of Governors of the Federal Reserve System</a></p><p>В документе говорится, что протоколы для каждого планового заседания Комитета обычно публикуются через три недели после решения по политике. В них описание экономических и финансовых условий основано только на информации, доступной Комитету на момент заседания. <a href=\"https://www.federalreserve.gov/newsevents/pressreleases/monetary20261118a.htm\" rel=\"noopener noreferrer\">Board of Governors of the Federal Reserve System</a></p>",
+      "meta_title": "Федеральная резервная система публикует протоколы заседания от 27–28 октября 2026 года",
+      "meta_description": "Федеральная резервная система в среду опубликовала протоколы заседания Федерального комитета по операциям на открытом рынке от 27–28 октября 2026 года. В документе указано, что такие протоколы обычно публикуются через три недели после планового засед"
+    }
+  }
+}

@@ -17,6 +17,7 @@ use App\Models\EditorialEvent;
 use App\Support\AiDemoFixtures;
 use App\Support\AiDrafting;
 use App\Support\AiOutputSchema;
+use App\Support\AiPricing;
 use App\Support\AiRecovery;
 use App\Support\AiSemanticVerification;
 use App\Support\AiSettings;
@@ -426,5 +427,78 @@ class AiAutonomousRecoveryTest extends AiTestCase
         $this->assertSame(0, $verification->children()->count());
         $this->assertSame('paused', $english->article->fresh()->automation_status);
         Http::assertSentCount(1);
+    }
+
+    public function test_exact_unexplained_verifier_failure_is_not_accepted_as_a_success(): void
+    {
+        $fixture = json_decode(file_get_contents(base_path('tests/Fixtures/rejected-federal-reserve-verifier-consistency.json')), true, flags: JSON_THROW_ON_ERROR);
+        $run = new AiGenerationRun(['task' => 'verification', 'locale' => 'ru', 'evidence_snapshot' => $fixture['evidence']]);
+        $run->schema_version = 'verification-v2';
+        $run->input_payload = ['assertions' => $fixture['assertions']];
+        $report = app(AiSemanticVerification::class)->report($fixture['output'], $run);
+        $this->assertFalse($fixture['output']['original']);
+        $this->assertSame([], $fixture['output']['issues']);
+        $this->assertSame(['supported'], array_values(array_unique(array_column($fixture['output']['assessments'], 'verdict'))));
+        $this->assertContains('semantic_report_inconsistent', $report['critical']);
+        $this->assertContains('semantic_verification_failed', $report['critical']);
+        Http::assertNothingSent();
+    }
+
+    public function test_inconsistent_verifier_retries_its_own_stage_after_translation_corrections_are_exhausted(): void
+    {
+        $english = $this->english();
+        $this->verifyEnglish($english);
+        $translation = app(AiDrafting::class)->translate($this->admin, $english->article->fresh(), ['ru'], dispatch: false)[0];
+        for ($attempt = 1; $attempt <= 2; $attempt++) {
+            $document = app(FakeAiDraftProvider::class)->fixture($translation);
+            $document['excerpt'] .= ' 99999';
+            $this->fakeProvider($this->response($translation, $document));
+            app(AiDrafting::class)->process($translation->id, false);
+            app(AiDrafting::class)->validate($translation->id, false);
+            $this->artisan('ai:dispatch')->assertSuccessful();
+            $this->travel(300)->seconds();
+            $this->artisan('ai:dispatch')->assertSuccessful();
+            $translation = $translation->children()->sole();
+        }
+        $this->mockStages();
+        $this->complete($translation);
+        $verification = app(AiDrafting::class)->verify($this->admin, $english->article->fresh(), 'ru');
+        $document = $this->verifiedDocument($verification);
+        $document['original'] = false;
+        $this->fakeProvider($this->response($verification, $document));
+        app(AiDrafting::class)->process($verification->id, false);
+        app(AiDrafting::class)->validate($verification->id, false);
+        $this->assertSame(AiRunStatus::QualityBlocked, $verification->fresh()->status);
+        $this->assertSame('verification_correction', app(AiRecovery::class)->plan($verification->fresh()));
+        $this->assertSame(3, AiGenerationRun::where('task', 'translation')->where('locale', 'ru')->count());
+        $report = $verification->fresh()->quality_report;
+        $report['recovery'] = ['state' => 'held', 'reason' => 'critical_quality_failure'];
+        $verification->forceFill(['quality_report' => $report])->save();
+        $english->article->forceFill(['automation_status' => 'held', 'automation_error' => 'critical_quality_failure'])->save();
+        $article = $this->drain();
+        $this->assertSame(ArticleStatus::Published, $article->status);
+        $this->assertSame(1, AiGenerationRun::where('task', 'english')->count());
+        $this->assertSame(3, AiGenerationRun::where('task', 'translation')->where('locale', 'ru')->count());
+        $this->assertSame(2, AiGenerationRun::where('task', 'verification')->where('locale', 'ru')->count());
+        $this->assertSame('verification', $verification->children()->sole()->task);
+        $this->assertSame($document, $verification->fresh()->output_document);
+    }
+
+    public function test_actual_verification_recovery_fits_the_existing_input_budget_without_duplicate_evidence_reports(): void
+    {
+        $fixture = json_decode(file_get_contents(base_path('tests/Fixtures/rejected-federal-reserve-verifier-consistency.json')), true, flags: JSON_THROW_ON_ERROR);
+        $run = new AiGenerationRun(['task' => 'verification', 'locale' => 'ru', 'evidence_snapshot' => $fixture['evidence']]);
+        $run->schema_version = 'verification-v2';
+        $payload = $fixture['input'];
+        $payload['correction'] = ['failed_task' => 'verification', 'failed_locale' => 'ru',
+            'diagnostics' => app(AiSemanticVerification::class)->failureContext($fixture['output'], ['critical' => ['semantic_verification_failed']])];
+        $estimate = app(AiPricing::class)->reservation($payload, app(AiOutputSchema::class)->jsonSchema($run),
+            ['input' => 750000, 'cached' => 75000, 'write' => 0, 'output' => 4500000], app(OpenAiDraftProvider::class)->instructions($run));
+        $this->assertGreaterThan(0, $estimate);
+        $this->assertLessThan(1000000, $estimate);
+        $this->assertFalse($payload['correction']['diagnostics']['checks']['original']);
+        $this->assertSame([], $payload['correction']['diagnostics']['checks']['issues']);
+        $this->assertSame([], $payload['correction']['diagnostics']['failed_fields']);
+        Http::assertNothingSent();
     }
 }

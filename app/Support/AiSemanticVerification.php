@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\AiGenerationRun;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -69,6 +70,21 @@ class AiSemanticVerification
         ])->validate();
     }
 
+    public function failureContext(array $document, array $report): array
+    {
+        return ['checks' => Arr::only($document, ['version', 'supported', 'faithful_translation', 'original', 'correct_language', 'issues']),
+            'critical' => $report['critical'] ?? [],
+            'failed_fields' => collect($document['assessments'] ?? [])->where('verdict', '!=', 'supported')
+                ->map(fn (array $assessment): array => Arr::only($assessment, ['field', 'verdict', 'reason']))->values()->all()];
+    }
+
+    public function inconsistent(array $document): bool
+    {
+        return ($document['issues'] ?? null) === []
+            && (($document['supported'] ?? null) === false || ($document['faithful_translation'] ?? null) === false
+                || ($document['original'] ?? null) === false || ($document['correct_language'] ?? null) === false);
+    }
+
     public function report(array $document, AiGenerationRun $run): array
     {
         $critical = [];
@@ -77,6 +93,9 @@ class AiSemanticVerification
             $critical[] = 'semantic_verification_failed';
         }
         if ($run->schema_version === 'verification-v2') {
+            if ($this->inconsistent($document)) {
+                $critical[] = 'semantic_report_inconsistent';
+            }
             $assertions = collect($run->input_payload['assertions'] ?? [])->keyBy('field');
             $assessments = collect($document['assessments'])->keyBy('field');
             if ($assertions->isEmpty() || $assertions->keys()->sort()->values()->all() !== $assessments->keys()->sort()->values()->all()) {
