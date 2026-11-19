@@ -48,17 +48,25 @@ class AutomatedEvidence
             throw new AiFailure('primary_material_identity_mismatch');
         }
         $timestamp = $xpath->evaluate('string((//meta[@property="article:published_time"]/@content | //article//time/@datetime | //main//time/@datetime)[1])');
+        $federalReserve = $this->federalReserveMaterial($xpath, $reference);
         try {
             $date = preg_match('/\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})\z/D', $timestamp)
                 ? CarbonImmutable::parse($timestamp) : null;
         } catch (\Throwable) {
             $date = null;
         }
+        if ($federalReserve !== null) {
+            if ($timestamp !== '' && (! $date || abs($date->timestamp - $federalReserve['published_at']->timestamp) > 300)) {
+                throw new AiFailure('primary_material_date_mismatch');
+            }
+            $date = $federalReserve['published_at'];
+        }
         if (! $date || $date->isFuture() || abs($date->timestamp - $reference->source_published_at->timestamp) > 300) {
             throw new AiFailure('primary_material_date_mismatch');
         }
         $claims = [];
-        foreach ($xpath->query('//article//p[not(ancestor::nav or ancestor::aside or ancestor::footer or ancestor::script or ancestor::style)] | //main//p[not(ancestor::article or ancestor::nav or ancestor::aside or ancestor::footer or ancestor::script or ancestor::style)]') as $paragraph) {
+        $paragraphs = $federalReserve['paragraph_xpath'] ?? '//article//p[not(ancestor::nav or ancestor::aside or ancestor::footer or ancestor::script or ancestor::style)] | //main//p[not(ancestor::article or ancestor::nav or ancestor::aside or ancestor::footer or ancestor::script or ancestor::style)]';
+        foreach ($xpath->query($paragraphs) as $paragraph) {
             $text = Str::squish($paragraph->textContent);
             if (mb_strlen($text) < 80 || mb_strlen($text) > 1500 || preg_match('/[<>\p{C}]|ignore (?:all|previous) instructions|system prompt|api[_ ]?key|execute (?:code|commands)/iu', $text)) {
                 continue;
@@ -72,7 +80,7 @@ class AutomatedEvidence
         if (count($claims) < 2) {
             throw new AiFailure('insufficient_primary_material');
         }
-        DB::transaction(function () use ($candidate, $reference, $html, $date, $claims): void {
+        DB::transaction(function () use ($candidate, $reference, $html, $date, $claims, $federalReserve): void {
             $record = NewsCandidate::query()->lockForUpdate()->findOrFail($candidate->id);
             if (! in_array($record->status, [CandidateStatus::New, CandidateStatus::ReviewRequired, CandidateStatus::ProcessingFailed], true)
                 || $record->duplicate_of_id || $record->aiRuns()->exists()
@@ -95,12 +103,68 @@ class AutomatedEvidence
                         'url' => $reference->original_url, 'source_version' => $reference->source->version,
                         'document_sha256' => hash('sha256', $html), 'claim_sha256' => hash('sha256', $text),
                         'source_published_at' => $date->toIso8601String(), 'method' => 'primary-html-v1',
-                    ]]);
+                    ] + ($federalReserve['provenance'] ?? [])]);
             }
             $record->forceFill(['status' => CandidateStatus::ApprovedForDraft, 'automation_status' => 'evidence_verified',
                 'automation_error' => null, 'automation_retry_at' => null])->save();
             app(AiEvidence::class)->snapshot($record);
         }, 3);
+    }
+
+    /**
+     * @return array{published_at: CarbonImmutable, paragraph_xpath: string, provenance: array{extractor: string, canonical_url: string, visible_date: string, visible_release_time: string, date_sources: list<string>}}|null
+     */
+    private function federalReserveMaterial(DOMXPath $xpath, CandidateSourceReference $reference): ?array
+    {
+        $url = $reference->original_url;
+        if (parse_url($url, PHP_URL_HOST) !== 'www.federalreserve.gov') {
+            return null;
+        }
+        if (! preg_match('#\Ahttps://www\.federalreserve\.gov/newsevents/pressreleases/(?:monetary|bcreg|enforcement|other)(\d{8})[a-z]\.htm\z#D', $url, $path)) {
+            throw new AiFailure('unsupported_primary_material');
+        }
+        $heading = '//*[@id="article"]/div[contains(concat(" ", normalize-space(@class), " "), " heading ")]';
+        $body = '//*[@id="article"]/div[contains(concat(" ", normalize-space(@class), " "), " col-sm-8 ") and not(contains(concat(" ", normalize-space(@class), " "), " heading "))]';
+        $dates = $xpath->query($heading.'/p[contains(concat(" ", normalize-space(@class), " "), " article__time ")]');
+        $times = $xpath->query($heading.'/p[contains(concat(" ", normalize-space(@class), " "), " releaseTime ")]');
+        $titles = $xpath->query($heading.'/h3[contains(concat(" ", normalize-space(@class), " "), " title ")]');
+        $identities = $xpath->query('//head/meta[@property="og:url"]/@content | //head/link[@rel="canonical"]/@href');
+        if ($xpath->query('//*[@id="article"]')->length !== 1 || $titles->length !== 1 || $identities->length < 1
+            || $this->normalizer->headline($titles->item(0)->textContent) !== $this->normalizer->headline($reference->headline)) {
+            throw new AiFailure('primary_material_identity_mismatch');
+        }
+        foreach ($identities as $identity) {
+            if (trim($identity->nodeValue) !== $url) {
+                throw new AiFailure('primary_material_identity_mismatch');
+            }
+        }
+        if ($dates->length !== 1 || $times->length !== 1) {
+            throw new AiFailure('primary_material_date_mismatch');
+        }
+        $visibleDate = Str::squish($dates->item(0)->textContent);
+        $visibleTime = Str::squish($times->item(0)->textContent);
+        if (! preg_match('/\AFor release at (\d{1,2}:\d{2}) ([ap])\.m\. (EST|EDT)\z/D', $visibleTime, $release)) {
+            throw new AiFailure('primary_material_date_mismatch');
+        }
+        $localDateTime = $visibleDate.' '.$release[1].' '.$release[2].'m';
+        try {
+            $date = CarbonImmutable::createFromFormat('!F j, Y g:i a', $localDateTime, 'America/New_York');
+        } catch (\Throwable) {
+            $date = null;
+        }
+        if (! $date || $date->format('F j, Y g:i a') !== $localDateTime || $date->format('T') !== $release[3]
+            || $date->format('Ymd') !== $path[1]) {
+            throw new AiFailure('primary_material_date_mismatch');
+        }
+        if ($xpath->query($body)->length !== 1) {
+            throw new AiFailure('unsupported_primary_material');
+        }
+
+        return ['published_at' => $date->utc(),
+            'paragraph_xpath' => $body.'//p[not(ancestor::nav or ancestor::aside or ancestor::footer or ancestor::script or ancestor::style)]',
+            'provenance' => ['extractor' => 'federal-reserve-press-release-v1', 'canonical_url' => $url,
+                'visible_date' => $visibleDate, 'visible_release_time' => $visibleTime,
+                'date_sources' => ['rss', 'visible_release', 'press_release_url']]];
     }
 
     public function assertVerified(CandidateEvidence $claim): void
