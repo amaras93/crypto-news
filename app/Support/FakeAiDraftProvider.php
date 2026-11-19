@@ -73,10 +73,15 @@ class FakeAiDraftProvider implements AiDraftProvider
             $sections = [['key' => $run->section_key, 'heading' => $copy[6], 'paragraphs' => [['text' => $copy[2], 'claim_ids' => [$claims[0]]]]]];
         }
 
-        return ['version' => 'draft-v1', 'language' => $run->locale, 'headline' => $copy[0], 'excerpt' => $copy[1],
+        $document = ['version' => $run->schema_version === 'translation-v2' ? 'translation-v2' : 'draft-v1', 'language' => $run->locale, 'headline' => $copy[0], 'excerpt' => $copy[1],
             'seo_title' => $copy[0], 'seo_description' => $copy[1], 'slug' => 'offline-demonstration-'.$run->candidate->id.'-'.$run->locale,
             'takeaways' => $copy[4], 'sections' => $sections, 'entities' => ['Sandbox Exchange', 'SBX'],
             'suggested_tags' => [], 'editorial_notes' => ['SIMULATED fixture; private offline preview only.'],
             'unsupported_claim_warnings' => []];
+        if ($run->schema_version === 'translation-v2') {
+            $document['entity_mentions'] = [['canonical' => 'Sandbox Exchange', 'localized' => 'Sandbox Exchange'], ['canonical' => 'SBX', 'localized' => 'SBX']];
+        }
+
+        return $document;
     }
 }

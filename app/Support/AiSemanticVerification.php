@@ -26,6 +26,10 @@ class AiSemanticVerification
             }
         }
 
+        foreach ($document['entity_mentions'] ?? [] as $index => $mention) {
+            $fields[] = ['field' => 'entity_mentions.'.$index, 'text' => $mention['canonical'].' => '.$mention['localized'], 'claim_ids' => $allIds];
+        }
+
         return $fields;
     }
 

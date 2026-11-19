@@ -57,11 +57,13 @@ class AiQuality
         }
         if ($run->task === 'translation' && $run->input_payload) {
             $original = $run->input_payload['english_text'] ?? '';
-            if ($this->numbers($text) !== $this->numbers($original)) {
+            if ($this->numbers($this->normalizeCalendarMonths($text, $run->evidence_snapshot)) !== $this->numbers($original)) {
                 $report['critical'][] = 'translation_numbers_or_dates_changed';
             }
+            $mentions = collect($document['entity_mentions'] ?? [])->keyBy('canonical');
             foreach ($run->input_payload['preserved_entities'] ?? [] as $entity) {
-                if (! str_contains($text, $entity)) {
+                $mention = $run->schema_version === 'translation-v2' ? ($mentions->get($entity)['localized'] ?? '') : $entity;
+                if ($mention === '' || ! str_contains(mb_strtolower($text), mb_strtolower($mention))) {
                     $report['critical'][] = 'translation_entity_missing:'.$entity;
                 }
             }
@@ -98,7 +100,7 @@ class AiQuality
         $sourceText = implode(' ', array_column($evidence['claims'], 'text'));
         $figures = implode(' ', collect($evidence['claims'])->flatMap(fn (array $claim): array => $claim['figures'])->all());
         $allowedNumbers = $this->numbers($sourceText.' '.$figures);
-        foreach ($this->numbers($text) as $number) {
+        foreach ($this->numbers($this->normalizeCalendarMonths($text, $evidence)) as $number) {
             if (! in_array($number, $allowedNumbers, true)) {
                 $critical[] = 'unsupported_number:'.$number;
             }
@@ -208,6 +210,21 @@ class AiQuality
         }
 
         return [];
+    }
+
+    public function normalizeCalendarMonths(string $text, array $evidence): string
+    {
+        $source = implode(' ', array_column($evidence['claims'], 'text'));
+        $months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+        return preg_replace_callback('/(?<![0-9])([1-9]|1[0-2])\s*月/u', function (array $match) use ($source, $months): string {
+            $month = $months[(int) $match[1] - 1];
+            if (! preg_match('/\b'.preg_quote($month, '/').'\s+[0-9]{1,2}\b/u', $source)) {
+                return $match[0];
+            }
+
+            return $month.'月';
+        }, $text);
     }
 
     /** @return list<string> */

@@ -155,7 +155,7 @@ class AiDrafting
             ]);
             $run->article_id = $article?->id;
             $run->is_automated = $automated;
-            $run->schema_version = $task === 'verification' ? 'verification-v2' : 'draft-v1';
+            $run->schema_version = $task === 'verification' ? 'verification-v2' : ($task === 'translation' && $automated ? 'translation-v2' : 'draft-v1');
             $run->status = AiRunStatus::Queued;
             $run->save();
             if ($automated && $task === 'english') {

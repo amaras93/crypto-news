@@ -32,8 +32,8 @@ class AiOutputSchema
         $section = $this->object(['key' => ['type' => 'string', 'enum' => self::SECTIONS], 'heading' => $publicText + ['maxLength' => 100],
             'paragraphs' => ['type' => 'array', 'minItems' => 1, 'maxItems' => 6, 'items' => $paragraph]]);
 
-        return $this->object([
-            'version' => ['type' => 'string', 'enum' => ['draft-v1']],
+        $properties = [
+            'version' => ['type' => 'string', 'enum' => [$run->schema_version === 'translation-v2' ? 'translation-v2' : 'draft-v1']],
             'language' => ['type' => 'string', 'enum' => [$run->locale]],
             'headline' => $publicText + ['maxLength' => 200], 'excerpt' => $publicText + ['minLength' => 40, 'maxLength' => 500],
             'seo_title' => $publicText + ['maxLength' => 100], 'seo_description' => $publicText + ['maxLength' => 250],
@@ -45,7 +45,14 @@ class AiOutputSchema
             'suggested_tags' => ['type' => 'array', 'maxItems' => 8, 'items' => $publicText + ['maxLength' => 50]],
             'editorial_notes' => ['type' => 'array', 'items' => $string],
             'unsupported_claim_warnings' => ['type' => 'array', 'items' => $string],
-        ]);
+        ];
+        if ($run->schema_version === 'translation-v2') {
+            $properties['entity_mentions'] = ['type' => 'array', 'maxItems' => 30,
+                'description' => 'Internal provenance: map each preserved English entity or calendar term to its exact localized mention in public prose. Independent verification must confirm equivalent meaning.',
+                'items' => $this->object(['canonical' => $string + ['enum' => $entities], 'localized' => $publicText + ['minLength' => 1, 'maxLength' => 200]])];
+        }
+
+        return $this->object($properties);
     }
 
     public function validate(array $document, AiGenerationRun $run): array
@@ -64,9 +71,15 @@ class AiOutputSchema
         $keys = array_keys($this->jsonSchema($run)['properties']);
         $claims = array_column($run->evidence_snapshot['claims'], 'id');
         $plain = ['required', 'string', 'not_regex:/[<>\x00-\x08\x0b\x0c\x0e-\x1f]/u'];
-        $values = Validator::make(['document' => $document], [
+        $mappingRules = $run->schema_version === 'translation-v2' ? [
+            'document.entity_mentions' => ['present', 'array', 'max:30'],
+            'document.entity_mentions.*' => ['array:canonical,localized'],
+            'document.entity_mentions.*.canonical' => ['required', 'distinct', Rule::in(app(AiQuality::class)->allowedEntities($run->evidence_snapshot))],
+            'document.entity_mentions.*.localized' => [...$plain, 'max:200'],
+        ] : [];
+        $values = Validator::make(['document' => $document], $mappingRules + [
             'document' => ['required', 'array:'.implode(',', $keys)],
-            'document.version' => ['required', Rule::in(['draft-v1'])], 'document.language' => ['required', Rule::in([$run->locale])],
+            'document.version' => ['required', Rule::in([$run->schema_version === 'translation-v2' ? 'translation-v2' : 'draft-v1'])], 'document.language' => ['required', Rule::in([$run->locale])],
             'document.headline' => [...$plain, 'max:200'], 'document.excerpt' => [...$plain, 'min:40', 'max:500'],
             'document.seo_title' => [...$plain, 'max:100'], 'document.seo_description' => [...$plain, 'max:250'],
             'document.slug' => ['required', 'string', 'max:160', 'lowercase', 'regex:/\A[\p{L}\p{N}]+(?:[-_][\p{L}\p{N}]+)*\z/u'],
