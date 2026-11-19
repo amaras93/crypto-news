@@ -15,7 +15,7 @@ class NewsSource extends Model
 
     protected function casts(): array
     {
-        return ['ai_usage_allowed' => 'boolean', 'is_primary' => 'boolean', 'is_simulated' => 'boolean', 'enabled' => 'boolean', 'summary_permitted' => 'boolean', 'approved_at' => 'immutable_datetime', 'last_fetched_at' => 'immutable_datetime', 'last_success_at' => 'immutable_datetime', 'next_poll_at' => 'immutable_datetime', 'lease_until' => 'immutable_datetime'];
+        return ['primary_material_permitted' => 'boolean', 'ai_usage_allowed' => 'boolean', 'is_primary' => 'boolean', 'is_simulated' => 'boolean', 'enabled' => 'boolean', 'summary_permitted' => 'boolean', 'approved_at' => 'immutable_datetime', 'last_fetched_at' => 'immutable_datetime', 'last_success_at' => 'immutable_datetime', 'next_poll_at' => 'immutable_datetime', 'lease_until' => 'immutable_datetime'];
     }
 
     public function category(): BelongsTo

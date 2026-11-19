@@ -71,7 +71,8 @@ class CandidateEvidenceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([TextColumn::make('candidate.headline')->searchable()->limit(70)->wrap(),
-            TextColumn::make('claim')->limit(100)->wrap(), TextColumn::make('verifier.name'), TextColumn::make('verified_at')->dateTime()])
+            TextColumn::make('claim')->limit(100)->wrap(), TextColumn::make('verification_method')->badge(),
+            TextColumn::make('automated_verified_at')->dateTime(), TextColumn::make('verifier.name'), TextColumn::make('verified_at')->dateTime()])
             ->recordActions([ViewAction::make(), EditAction::make()->using(fn (CandidateEvidence $record, array $data, Action $action): CandidateEvidence => static::persist($data, $action, $record))])
             ->defaultSort('id', 'desc')->paginationPageOptions([10, 25, 50]);
     }

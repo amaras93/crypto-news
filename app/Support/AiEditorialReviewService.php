@@ -29,6 +29,9 @@ class AiEditorialReviewService
             if (! $record->ai_generation_run_id || ! in_array($record->status, [ArticleStatus::Draft, ArticleStatus::PendingReview], true)) {
                 throw new AiFailure('only_unpublished_ai_drafts_can_be_verified');
             }
+            if ($record->automation_status) {
+                $record->forceFill(['automation_status' => 'paused'])->save();
+            }
             $translation = $record->translations()->where('locale', $locale)->lockForUpdate()->firstOrFail();
             $run = $translation->aiRun ?? $record->aiRun;
             if ($approve && $locale !== 'en') {

@@ -16,6 +16,7 @@ use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -40,12 +41,12 @@ class AiDrafting
     }
 
     public function generate(User $actor, NewsCandidate $candidate, ?User $author = null, bool $simulated = false,
-        bool $allowEditorRegeneration = false, ?string $requestKey = null, bool $dispatch = true): AiGenerationRun
+        bool $allowEditorRegeneration = false, ?string $requestKey = null, bool $dispatch = true, bool $automated = false): AiGenerationRun
     {
         abort_unless($actor->fresh()?->is_admin, 403);
 
         return $this->create($actor, $candidate, 'english', 'en', $author ?? $actor, $simulated,
-            $allowEditorRegeneration, false, null, $requestKey, $dispatch);
+            $allowEditorRegeneration, false, null, $requestKey, $dispatch, automated: $automated);
     }
 
     /** @param list<string> $locales
@@ -56,7 +57,12 @@ class AiDrafting
         $article = $article->fresh(['translations', 'aiRun']);
         Gate::forUser($actor->fresh())->authorize('update', $article);
         $this->editable($article);
-        app(AiEditorialReviewService::class)->assertEnglishReviewed($article);
+        $automated = $article->automation_status === 'processing';
+        if ($automated) {
+            app(AiAutomation::class)->assertAccepted($article, 'en');
+        } else {
+            app(AiEditorialReviewService::class)->assertEnglishReviewed($article);
+        }
         Validator::make(['locales' => $locales], ['locales' => ['required', 'array', 'min:1', 'max:7'],
             'locales.*' => ['required', 'distinct', Rule::in(array_diff(array_keys(config('news.locales')), ['en']))]])->validate();
         $limit = $article->ai_simulated ? 7 : $this->settings->limits()['languages'];
@@ -67,7 +73,7 @@ class AiDrafting
         $runs = [];
         foreach ($locales as $locale) {
             $runs[] = $this->create($actor, $article->aiRun->candidate, 'translation', $locale, $article->author,
-                $article->ai_simulated, $article->aiRun->editor_regeneration_allowed, $confirmOverwrite, $article, null, $dispatch);
+                $article->ai_simulated, $article->aiRun->editor_regeneration_allowed, $confirmOverwrite, $article, null, $dispatch, automated: $automated);
         }
 
         return $runs;
@@ -83,8 +89,16 @@ class AiDrafting
             $article->ai_simulated, $article->aiRun->editor_regeneration_allowed, false, $article, null, $dispatch, $section);
     }
 
+    public function verify(User $actor, Article $article, string $locale): AiGenerationRun
+    {
+        abort_unless($actor->fresh()?->is_admin, 403);
+
+        return $this->create($actor, $article->aiRun->candidate, 'verification', $locale, $article->author,
+            false, false, false, $article, null, true, automated: true);
+    }
+
     private function create(User $actor, NewsCandidate $candidate, string $task, string $locale, User $author,
-        bool $simulated, bool $allowEditor, bool $confirm, ?Article $article, ?string $requestKey, bool $dispatch, ?string $section = null): AiGenerationRun
+        bool $simulated, bool $allowEditor, bool $confirm, ?Article $article, ?string $requestKey, bool $dispatch, ?string $section = null, bool $automated = false): AiGenerationRun
     {
         $requestKey ??= Str::uuid()->toString();
         Validator::make(['key' => $requestKey], ['key' => ['required', 'uuid']])->validate();
@@ -95,9 +109,12 @@ class AiDrafting
             abort(403);
         }
         $this->mode($task, $simulated, $candidate);
+        if ($automated && ! $this->settings->automatic()) {
+            throw new AiFailure('automatic_publishing_stopped');
+        }
         $snapshot = $this->evidence->snapshot($candidate);
         $digest = $this->evidence->digest($snapshot);
-        $run = DB::transaction(function () use ($actor, $candidate, $task, $locale, $author, $simulated, $allowEditor, $confirm, $article, $requestKey, $section, $billing, $snapshot, $digest): AiGenerationRun {
+        $run = DB::transaction(function () use ($actor, $candidate, $task, $locale, $author, $simulated, $allowEditor, $confirm, $article, $requestKey, $section, $billing, $snapshot, $digest, $automated): AiGenerationRun {
             NewsCandidate::query()->lockForUpdate()->findOrFail($candidate->id);
             if ($task === 'translation') {
                 $planned = AiGenerationRun::where('article_id', $article->id)->where('task', 'translation')->distinct()->pluck('locale')->all();
@@ -137,8 +154,13 @@ class AiDrafting
                 'english_digest' => $english?->contentDigest(), 'target_digest' => $target?->contentDigest(),
             ]);
             $run->article_id = $article?->id;
+            $run->is_automated = $automated;
+            $run->schema_version = $task === 'verification' ? 'verification-v1' : 'draft-v1';
             $run->status = AiRunStatus::Queued;
             $run->save();
+            if ($automated && $task === 'english') {
+                $candidate->forceFill(['automation_status' => 'generation_queued', 'automation_error' => null])->save();
+            }
 
             return $run;
         }, 3);
@@ -255,7 +277,11 @@ class AiDrafting
             } catch (ValidationException) {
                 throw new AiFailure('invalid_structured_output');
             }
-            $report = $this->quality->document($document, $run);
+            $report = $run->task === 'verification'
+                ? ['critical' => $document['supported'] === true && $document['faithful_translation'] === true && $document['original'] === true
+                    && $document['correct_language'] === true && $document['issues'] === [] ? [] : ['semantic_verification_failed'],
+                    'checks_version' => 'semantic-v1', 'human_review_required' => false]
+                : $this->quality->document($document, $run);
             $run->quality_report = $report;
             $run->status = $report['critical'] ? AiRunStatus::QualityBlocked : AiRunStatus::Validated;
             if ($report['critical']) {
@@ -278,7 +304,9 @@ class AiDrafting
                 throw new AiFailure('critical_quality_failure');
             }
             $document = $run->output_document;
-            if ($run->task !== 'section') {
+            if ($run->task === 'verification') {
+                app(AiAutomation::class)->accept($run);
+            } elseif ($run->task !== 'section') {
                 $editor = app(ArticleEditor::class);
                 $article = $run->article;
                 $data = $article ? $editor->formData($article) : [
@@ -299,7 +327,7 @@ class AiDrafting
                 $article = $editor->save($run->requester, $data, $article, ContentSource::Ai);
                 if ($run->task === 'english') {
                     $article->forceFill(['ai_candidate_id' => $run->news_candidate_id, 'ai_generation_run_id' => $run->id,
-                        'ai_simulated' => $run->is_simulated])->save();
+                        'ai_simulated' => $run->is_simulated, 'automation_status' => $run->is_automated ? 'processing' : null])->save();
                 }
                 $translation = $article->translations()->where('locale', $run->locale)->firstOrFail();
                 $translation->forceFill(['ai_run_id' => $run->id, 'ai_generated_hash' => $translation->contentDigest(),
@@ -307,7 +335,7 @@ class AiDrafting
                     'ai_reviewed_at' => null, 'ai_human_edited_at' => null])->save();
                 $run->article_id = $article->id;
                 $run->save();
-                if ($run->task === 'english') {
+                if ($run->task === 'english' && ! $run->is_automated) {
                     app(ArticlePublication::class)->transition($run->requester, $article->fresh(), 'submit_review');
                 }
             }
@@ -336,6 +364,18 @@ class AiDrafting
 
     private function authorize(AiGenerationRun $run): void
     {
+        if ($run->is_automated) {
+            if (! $this->settings->automatic() || ! in_array((int) $run->candidate->category_id,
+                array_map('intval', $this->settings->current()['enabled_category_ids']), true)) {
+                throw new AiFailure('automatic_publishing_stopped');
+            }
+            if ($run->candidate->duplicate_of_id) {
+                throw new AiFailure('automatic_duplicate_blocked');
+            }
+            if ($run->article_id && $run->article?->automation_status !== 'processing') {
+                throw new AiFailure('automation_paused');
+            }
+        }
         if ($run->is_simulated || in_array($run->status, [AiRunStatus::Queued, AiRunStatus::Requesting], true)) {
             $this->mode($run->task, $run->is_simulated, $run->candidate);
         }
@@ -365,10 +405,17 @@ class AiDrafting
                 if (! $run->is_simulated && AiGenerationRun::where('article_id', $article->id)->where('task', 'translation')->distinct()->count('locale') > $this->settings->limits()['languages']) {
                     throw new AiFailure('translation_language_limit');
                 }
-                app(AiEditorialReviewService::class)->assertEnglishReviewed($article);
+                if ($run->is_automated) {
+                    app(AiAutomation::class)->assertAccepted($article, 'en');
+                } else {
+                    app(AiEditorialReviewService::class)->assertEnglishReviewed($article);
+                }
                 if ($article->translation($run->locale)?->contentDigest() !== $run->target_digest) {
                     throw new AiFailure('translation_changed_after_queueing');
                 }
+            }
+            if ($run->task === 'verification' && $article->translation($run->locale)?->contentDigest() !== $run->target_digest) {
+                throw new AiFailure('verification_target_changed');
             }
         }
     }
@@ -417,6 +464,10 @@ class AiDrafting
                 app(ArticleContent::class)->render($english->body)['text']]);
             $payload['preserved_entities'] = array_values(array_filter(collect($claims)->flatMap(fn (array $claim): array => $claim['entities'])->unique()->all(),
                 fn (string $entity): bool => str_contains($payload['english_text'], $entity)));
+        }
+        if ($run->task === 'verification') {
+            $target = $run->article->fresh(['translations'])->translation($run->locale);
+            $payload['target'] = $target->only(['title', 'excerpt', 'summary', 'body', 'meta_title', 'meta_description']);
         }
 
         return $payload;
@@ -469,6 +520,12 @@ class AiDrafting
             $record->active_key = $uncertain ? $record->active_key : null;
             $record->completed_at = now();
             $record->save();
+            if ($record->is_automated && $record->task === 'english' && ! $record->article_id
+                && (! $record->retry_at || $record->attempt >= config('ai.max_attempts'))) {
+                $record->candidate->forceFill(['automation_status' => 'held', 'automation_error' => $failure->reason])->save();
+            }
+            Log::notice('AI stage stopped', ['run_id' => $record->id, 'task' => $record->task,
+                'locale' => $record->locale, 'reason' => $failure->reason, 'uncertain_cost' => $uncertain]);
         }, 3);
     }
 
@@ -488,7 +545,7 @@ class AiDrafting
             }
             $run = $this->create($actor, $locked->candidate, $locked->task, $locked->locale, $locked->author,
                 $locked->is_simulated, $locked->editor_regeneration_allowed, $locked->confirm_human_overwrite, $locked->article,
-                null, false, $locked->section_key);
+                null, false, $locked->section_key, $locked->is_automated);
             $run->forceFill(['parent_run_id' => $locked->id, 'attempt' => $locked->attempt + 1])->save();
             if ($dispatch) {
                 $this->dispatch($run);

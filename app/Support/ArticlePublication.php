@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\ArticleStatus;
+use App\Models\AiBudgetPeriod;
 use App\Models\Article;
 use App\Models\EditorialEvent;
 use App\Models\User;
@@ -44,10 +45,13 @@ class ArticlePublication
             $record = Article::query()->lockForUpdate()->findOrFail($article->id);
             $ability = in_array($action, ['save_draft', 'submit_review'], true) ? 'submit' : 'publish';
             Gate::forUser($actor)->authorize($ability, $record);
-            $before = [$record->status, $record->published_at?->timestamp, $record->approved_at?->timestamp, $record->reviewer_id];
+            $before = [$record->status, $record->published_at?->timestamp, $record->approved_at?->timestamp, $record->reviewer_id, $record->automation_status];
             switch ($action) {
                 case 'save_draft':
                 case 'unpublish':
+                    if ($record->automation_status) {
+                        $record->automation_status = 'paused';
+                    }
                     $record->status = ArticleStatus::Draft;
                     $record->approved_at = null;
                     $record->reviewer_id = null;
@@ -90,10 +94,28 @@ class ArticlePublication
                     $record->reviewer_id = $actor->id;
                     $record->approved_at = $record->approved_at ?? now();
                     break;
+                case 'publish_automatically':
+                    app(AiAutomation::class)->assertPublishable($record->load('translations', 'aiRun'));
+                    $key = 'day:'.now()->utc()->toDateString();
+                    DB::table('ai_budget_periods')->insertOrIgnore(['period_key' => $key, 'created_at' => now(), 'updated_at' => now()]);
+                    AiBudgetPeriod::where('period_key', $key)->lockForUpdate()->firstOrFail();
+                    if (EditorialEvent::where('action', 'automatic_published')->where('created_at', '>=', now()->utc()->startOfDay())->count()
+                        >= app(AiSettings::class)->limits()['articles']) {
+                        throw new AiFailure('daily_publication_limit');
+                    }
+                    $this->assertPublishable($record, false);
+                    $record->status = ArticleStatus::Published;
+                    $record->published_at = now();
+                    $record->automation_status = 'published';
+                    $record->automation_error = null;
+                    $record->reviewer_id = null;
+                    $record->approved_at = null;
+                    $action = 'automatic_published';
+                    break;
                 default:
                     throw ValidationException::withMessages(['status' => 'Unknown editorial operation.']);
             }
-            $after = [$record->status, $record->published_at?->timestamp, $record->approved_at?->timestamp, $record->reviewer_id];
+            $after = [$record->status, $record->published_at?->timestamp, $record->approved_at?->timestamp, $record->reviewer_id, $record->automation_status];
             if ($before !== $after) {
                 $record->save();
                 EditorialEvent::create(['article_id' => $record->id, 'user_id' => $actor->id, 'action' => $action]);
@@ -126,7 +148,8 @@ class ArticlePublication
         DB::transaction(function () use ($actor, $article): void {
             $record = Article::query()->lockForUpdate()->findOrFail($article->id);
             Gate::forUser($actor)->authorize('delete', $record);
-            $record->forceFill(['status' => ArticleStatus::Draft, 'approved_at' => null, 'reviewer_id' => null])->save();
+            $record->forceFill(['status' => ArticleStatus::Draft, 'approved_at' => null, 'reviewer_id' => null,
+                'automation_status' => $record->automation_status ? 'paused' : null])->save();
             $record->delete();
             EditorialEvent::create(['article_id' => $record->id, 'user_id' => $actor->id, 'action' => 'trashed']);
         });

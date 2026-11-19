@@ -8,6 +8,7 @@ use App\Models\AiGenerationRun;
 use App\Models\Article;
 use App\Models\NewsCandidate;
 use App\Models\User;
+use App\Support\AiAutomation;
 use App\Support\AiDrafting;
 use App\Support\AiFailure;
 use App\Support\AiSettings;
@@ -17,7 +18,7 @@ class ScheduleAiDrafts extends Command
 {
     protected $signature = 'ai:dispatch';
 
-    protected $description = 'Resume bounded pending AI stages and, only when explicitly enabled, queue approved English candidates';
+    protected $description = 'Resume bounded AI stages and run enabled evidence, generation, translation and publishing workflows';
 
     public function handle(AiSettings $settings, AiDrafting $pipeline): int
     {
@@ -31,6 +32,7 @@ class ScheduleAiDrafts extends Command
             $pipeline->fail($run, new AiFailure('worker_outcome_unknown', uncertain: (bool) $run->request_sent_at));
         }
         $count = 0;
+        $count += app(AiAutomation::class)->tick();
         foreach (AiGenerationRun::whereIn('status', [AiRunStatus::Queued, AiRunStatus::Received, AiRunStatus::Validated])
             ->where('is_simulated', false)->oldest('id')->limit(20)->get() as $run) {
             if ($settings->enabledFor($run->task)) {
@@ -38,7 +40,7 @@ class ScheduleAiDrafts extends Command
                 $count++;
             }
         }
-        if (config('ai.scheduled_generation_enabled') && $current['scheduled_generation_enabled'] && $pipeline->isOperational()) {
+        if (! $settings->automatic() && config('ai.scheduled_generation_enabled') && $current['scheduled_generation_enabled'] && $pipeline->isOperational()) {
             $actor = User::find($current['updated_by'] ?? null);
             $author = User::find($current['author_id']);
             if ($actor?->is_admin && $author?->isEditorial()) {
@@ -54,7 +56,7 @@ class ScheduleAiDrafts extends Command
                 }
             }
         }
-        $this->info('Queued AI stages: '.$count.'. No publication is performed.');
+        $this->info('Queued AI stages: '.$count.'. Automatic publication requires all eight verified languages and enabled controls.');
 
         return self::SUCCESS;
     }

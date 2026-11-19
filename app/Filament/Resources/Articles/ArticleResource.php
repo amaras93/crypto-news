@@ -165,6 +165,7 @@ class ArticleResource extends Resource
             TextColumn::make('languages')->getStateUsing(fn (Article $record): array => $record->translations->pluck('locale')->filter(fn (string $locale): bool => array_key_exists($locale, config('news.locales')))->map(fn (string $locale): string => strtoupper($locale))->all())->badge(),
             TextColumn::make('created_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('published_at')->dateTime()->sortable(),
+            TextColumn::make('automation_status')->badge(), TextColumn::make('automation_error')->wrap(),
             TextColumn::make('updated_at')->dateTime()->sortable(),
         ])->defaultSort('updated_at', 'desc')->paginated([10, 25, 50])->filters([
             SelectFilter::make('status')->options(collect(ArticleStatus::cases())->mapWithKeys(fn (ArticleStatus $status): array => [$status->value => ucwords(str_replace('_', ' ', $status->value))])->all()),

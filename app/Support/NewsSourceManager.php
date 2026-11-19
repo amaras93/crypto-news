@@ -51,10 +51,14 @@ class NewsSourceManager
             'polling_minutes' => ['nullable', 'integer', 'between:15,1440'], 'item_limit' => ['required', 'integer', 'between:1,100'],
             'approval_confirmed' => ['required', 'boolean'],
             'ai_usage_allowed' => ['sometimes', 'boolean'], 'is_primary' => ['sometimes', 'boolean'],
+            'primary_material_permitted' => ['sometimes', 'boolean'],
             'publisher_group' => ['nullable', 'string', 'max:100', 'regex:/\A[a-z0-9-]+\z/D'],
         ])->validate();
         if (($values['ai_usage_allowed'] ?? false) && (! $values['approval_confirmed'] || empty($values['publisher_group']))) {
             throw ValidationException::withMessages(['ai_usage_allowed' => 'AI usage requires verified licensing and the publisher ownership group.']);
+        }
+        if (($values['primary_material_permitted'] ?? false) && (! ($values['is_primary'] ?? false) || ! ($values['ai_usage_allowed'] ?? false))) {
+            throw ValidationException::withMessages(['primary_material_permitted' => 'Primary material retrieval requires primary-source status and explicit AI usage rights.']);
         }
         try {
             $values['website'] = $this->urls->resolve($values['website'])['url'];
@@ -76,7 +80,7 @@ class NewsSourceManager
             $feedChanged = $record->feed_url !== $values['feed_url'];
             $approved = (bool) $values['approval_confirmed'];
             unset($values['approval_confirmed']);
-            foreach (['ai_usage_allowed', 'is_primary', 'publisher_group'] as $field) {
+            foreach (['ai_usage_allowed', 'is_primary', 'publisher_group', 'primary_material_permitted'] as $field) {
                 if (array_key_exists($field, $values)) {
                     $record->{$field} = $values[$field];
                     unset($values[$field]);

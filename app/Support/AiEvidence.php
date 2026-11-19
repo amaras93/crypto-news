@@ -28,7 +28,8 @@ class AiEvidence
         $record = $evidence ? CandidateEvidence::query()->where('news_candidate_id', $candidate->id)->findOrFail($evidence->id) : new CandidateEvidence;
         unset($values['confirmed']);
         $record->fill($values + ['news_candidate_id' => $candidate->id, 'claim_key' => $record->claim_key ?? Str::uuid()->toString(),
-            'verified_by' => $actor->id, 'verified_at' => now()]);
+            'verified_by' => $actor->id, 'verified_at' => now(), 'verification_method' => 'human',
+            'automated_verified_at' => null, 'retrieval_metadata' => null]);
         $record->save();
 
         return $record;
@@ -50,13 +51,17 @@ class AiEvidence
         }
         $result = [];
         foreach ($claims as $claim) {
-            if (! $claim->verifier?->isEditorial() || ! $claim->verified_at) {
+            $automated = $claim->verification_method === 'automated_primary';
+            if ($automated) {
+                app(AutomatedEvidence::class)->assertVerified($claim);
+            } elseif ($claim->verification_method !== 'human' || ! $claim->verifier?->isEditorial() || ! $claim->verified_at) {
                 throw new AiFailure('evidence_reviewer_unavailable');
             }
             $references = $this->references($candidate, $claim->reference_ids, $claim->material);
             $result[] = [
                 'id' => $claim->claim_key, 'text' => $claim->claim, 'entities' => $claim->entities, 'figures' => $claim->figures,
-                'material' => $claim->material, 'verified_at' => $claim->verified_at->toIso8601String(),
+                'material' => $claim->material, 'verified_at' => $claim->verified_at?->toIso8601String(),
+                'verification_method' => $claim->verification_method, 'automated_verified_at' => $claim->automated_verified_at?->toIso8601String(),
                 'references' => $references,
             ];
         }

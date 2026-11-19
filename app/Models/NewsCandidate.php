@@ -21,7 +21,7 @@ class NewsCandidate extends Model
 
     protected function casts(): array
     {
-        return ['is_simulated' => 'boolean', 'status' => CandidateStatus::class, 'classification' => 'array', 'duplicate_reasons' => 'array', 'published_at' => 'immutable_datetime', 'discovered_at' => 'immutable_datetime', 'reviewed_at' => 'immutable_datetime'];
+        return ['automation_retry_at' => 'immutable_datetime', 'is_simulated' => 'boolean', 'status' => CandidateStatus::class, 'classification' => 'array', 'duplicate_reasons' => 'array', 'published_at' => 'immutable_datetime', 'discovered_at' => 'immutable_datetime', 'reviewed_at' => 'immutable_datetime'];
     }
 
     public function references(): HasMany

@@ -29,7 +29,7 @@ class ArticleTranslation extends Model
 
     public function scopePublicReady(Builder $query): void
     {
-        $query->where(fn (Builder $review): Builder => $review->whereNull('ai_review_status')->orWhere('ai_review_status', 'approved'));
+        $query->where(fn (Builder $review): Builder => $review->whereNull('ai_review_status')->orWhereIn('ai_review_status', ['approved', 'automated']));
     }
 
     public function contentDigest(): string

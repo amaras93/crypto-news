@@ -58,6 +58,7 @@ class NewsSourceResource extends Resource
             Toggle::make('summary_permitted')->default(false)->helperText('Store a plain-text snippet only when the documented usage rights allow it.'),
             Toggle::make('ai_usage_allowed')->default(false)->helperText('Separate permission for AI processing of verified factual evidence; document permitted use in licensing notes.'),
             Toggle::make('is_primary')->default(false)->helperText('Official first-party announcement, filing or regulator; not a secondary report.'),
+            Toggle::make('primary_material_permitted')->default(false)->helperText('I confirmed permission to retrieve article-page excerpts and process them with AI. Document the rights and attribution in licensing notes.'),
             TextInput::make('publisher_group')->maxLength(100)->helperText('Shared lowercase ownership key, e.g. publisher-group. Different brands in one group are not independent corroboration.'),
             Toggle::make('approval_confirmed')->default(false)->afterStateHydrated(function (Toggle $component, ?NewsSource $record): void {
                 $component->state((bool) $record?->approved_at);

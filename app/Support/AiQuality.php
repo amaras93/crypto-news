@@ -13,6 +13,10 @@ class AiQuality
         $text = implode(' ', [$document['headline'], $document['excerpt'], $document['seo_title'], $document['seo_description'], ...array_column($document['sections'], 'heading'), ...$document['takeaways'],
             ...collect($document['sections'])->flatMap(fn (array $section): array => array_column($section['paragraphs'], 'text'))->all()]);
         $report = $this->text($text, $run->evidence_snapshot);
+        if ($run->is_automated) {
+            $report['human_review_required'] = false;
+            $report['warnings'] = ['Separate automated semantic verification is required before this content can be published.'];
+        }
         $script = match ($run->locale) {
             'ru' => '/\p{Cyrillic}/u', 'ja' => '/[\p{Hiragana}\p{Katakana}\p{Han}]/u',
             'zh' => '/\p{Han}/u', default => '/\p{Latin}/u',

@@ -18,11 +18,21 @@ class AiSettings
             'monthly_limit_microusd' => config('ai.monthly_limit_microusd'), 'max_articles_per_day' => config('ai.max_articles_per_day'),
             'max_concurrent_jobs' => config('ai.max_concurrent_jobs'), 'max_translation_languages' => config('ai.max_translation_languages'),
             'author_id' => null,
+            'automatic_publishing' => false, 'enabled_category_ids' => [],
             'updated_by' => null,
         ];
         $stored = AiPipelineSetting::query()->find(1);
 
-        return $stored ? array_replace($defaults, $stored->only(array_keys($defaults))) : $defaults;
+        $settings = $stored ? array_replace($defaults, $stored->only(array_keys($defaults))) : $defaults;
+        $settings['enabled_category_ids'] ??= [];
+
+        return $settings;
+    }
+
+    public function automatic(): bool
+    {
+        return (bool) config('ai.automatic_publishing') && $this->current()['automatic_publishing']
+            && $this->enabledFor('english') && $this->enabledFor('translation') && $this->limits()['languages'] === 7;
     }
 
     public function enabledFor(string $task): bool
@@ -80,7 +90,9 @@ class AiSettings
             'max_articles_per_day' => ['required', 'integer', 'between:0,1000'],
             'max_concurrent_jobs' => ['required', 'integer', 'between:1,5'],
             'max_translation_languages' => ['required', 'integer', 'between:0,7'],
-            'author_id' => ['nullable', 'integer', 'exists:users,id'], 'automatic_publishing' => ['prohibited'],
+            'author_id' => ['nullable', 'integer', 'exists:users,id'], 'automatic_publishing' => ['sometimes', 'boolean'],
+            'enabled_category_ids' => ['sometimes', 'array'],
+            'enabled_category_ids.*' => ['integer', 'distinct', 'exists:categories,id'],
         ])->validate();
         $values['model'] = $values['model'] ?? '';
         AiPipelineSetting::updateOrCreate(['id' => 1], $values + ['updated_by' => $actor->id]);

@@ -3,10 +3,12 @@
 namespace App\Filament\Pages;
 
 use App\AiRunStatus;
+use App\Filament\Resources\Articles\ArticleResource;
 use App\IngestionStatus;
 use App\Models\AiBudgetPeriod;
 use App\Models\AiGenerationRun;
 use App\Models\Article;
+use App\Models\EditorialEvent;
 use App\Models\IngestionRun;
 use App\Models\NewsCandidate;
 use App\Models\NewsSource;
@@ -79,10 +81,13 @@ class AiNewsControlCenter extends Page
         return $schema->statePath('aiData')->components([
             Toggle::make('candidate_processing_enabled')->label('Allow approved candidate processing'),
             Toggle::make('generation_enabled')->label('English draft generation'),
-            Toggle::make('translation_enabled')->label('Translation generation'),
+            Toggle::make('translation_enabled')->label('Automatic translation (seven languages in automatic mode)'),
             Toggle::make('scheduled_generation_enabled')->label('Scheduled English generation'),
-            Toggle::make('emergency_stop')->label('Emergency stop: prevent new paid requests'),
-            Toggle::make('automatic_publishing')->label('Automatic publishing — unavailable')->default(false)->disabled()->dehydrated(false),
+            Toggle::make('emergency_stop')->label('Emergency stop: halt AI processing and automatic publication'),
+            Toggle::make('automatic_publishing')->label('Automatic publishing without editorial approval')->default(false)
+                ->helperText('Server activation must also be enabled. All eight languages require automated evidence, quality and semantic checks. Disable to use human review.'),
+            Select::make('enabled_category_ids')->label('Enabled news categories for automatic publishing')->multiple()
+                ->options(fn (): array => ArticleResource::categoryOptions())->helperText('No categories selected means no unattended candidates.'),
             Select::make('provider')->options(['openai' => 'OpenAI Responses API'])->required(),
             TextInput::make('model')->maxLength(128)->helperText('An API model available to your account; must match verified server-side pricing. The Codex model does not configure this application.'),
             Select::make('author_id')->label('Actual editorial author for scheduled drafts')->options(fn (): array => User::where(fn ($query) => $query->where('is_admin', true)->orWhere('is_editor', true))->pluck('name', 'id')->all()),
@@ -121,7 +126,13 @@ class AiNewsControlCenter extends Page
             'Pending translation runs' => AiGenerationRun::where('is_simulated', false)->where('task', 'translation')->whereIn('status', [AiRunStatus::Queued, AiRunStatus::Requesting, AiRunStatus::Received, AiRunStatus::Validated])->count(),
             'Failed / quality-blocked runs' => AiGenerationRun::where('is_simulated', false)->whereIn('status', [AiRunStatus::Failed, AiRunStatus::QualityBlocked])->count(),
             'Uncertain-cost runs (held reservations)' => AiGenerationRun::where('status', AiRunStatus::Uncertain)->count(),
-            'AI articles awaiting human review' => Article::whereNotNull('ai_generation_run_id')->where('ai_simulated', false)->whereHas('translations', fn ($query) => $query->where('ai_review_status', 'pending'))->count(),
+            'Automatic publishing' => app(AiSettings::class)->automatic() ? 'Enabled; all validation and limits apply' : 'Disabled',
+            'Held automatic candidates' => NewsCandidate::where('automation_status', 'held')->count(),
+            'Held automatic articles' => Article::where('automation_status', 'held')->count(),
+            'Automatically published today (UTC)' => EditorialEvent::where('action', 'automatic_published')->where('created_at', '>=', now()->utc()->startOfDay())->count(),
+            'AI articles in optional human review' => Article::whereNotNull('ai_generation_run_id')->where('ai_simulated', false)
+                ->where(fn ($query) => $query->whereNull('automation_status')->orWhere('automation_status', 'paused'))
+                ->whereHas('translations', fn ($query) => $query->where('ai_review_status', 'pending'))->count(),
             'Estimated requests today (micro-USD)' => (int) (clone $runs)->sum('estimated_microusd'),
             'Recorded spending today (micro-USD, configured rates)' => $day?->actual_microusd ?? 0,
             'Held today (micro-USD)' => $day?->reserved_microusd ?? 0,

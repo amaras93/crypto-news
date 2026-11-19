@@ -102,6 +102,7 @@ class NewsCandidateResource extends Resource
         return $table->columns([
             TextColumn::make('headline')->searchable()->wrap()->limit(120),
             TextColumn::make('language')->badge(), TextColumn::make('status')->badge()->sortable(),
+            TextColumn::make('automation_status')->badge(), TextColumn::make('automation_error')->wrap(),
             TextColumn::make('topic')->sortable(), TextColumn::make('references_count')->label('Source references'),
             TextColumn::make('duplicate_of_id')->label('Possible duplicate of'),
             TextColumn::make('published_at')->dateTime()->sortable(), TextColumn::make('discovered_at')->dateTime()->sortable(),

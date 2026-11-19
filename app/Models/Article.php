@@ -122,7 +122,7 @@ class Article extends Model
                     ->whereNotNull('sponsor_id')->whereNotNull('sponsorship_review_hash')->whereNotNull('sponsorship_reviewed_at')
                     ->whereHas('sponsorshipReviewer', fn (Builder $reviewer): Builder => $reviewer->where('is_admin', true))))
             ->where(fn (Builder $editorial): Builder => $editorial->whereNull('ai_generation_run_id')->orWhereHas('translations',
-                fn (Builder $translation): Builder => $translation->where('locale', 'en')->where('ai_review_status', 'approved')))
+                fn (Builder $translation): Builder => $translation->where('locale', 'en')->whereIn('ai_review_status', ['approved', 'automated'])))
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
     }

@@ -12,6 +12,12 @@ class AiOutputSchema
 
     public function jsonSchema(AiGenerationRun $run): array
     {
+        if ($run->task === 'verification') {
+            return $this->object(['version' => ['type' => 'string', 'enum' => ['verification-v1']],
+                'supported' => ['type' => 'boolean'], 'faithful_translation' => ['type' => 'boolean'],
+                'original' => ['type' => 'boolean'], 'correct_language' => ['type' => 'boolean'],
+                'issues' => ['type' => 'array', 'items' => ['type' => 'string']]]);
+        }
         $claims = array_column($run->evidence_snapshot['claims'], 'id');
         $string = ['type' => 'string'];
         $paragraph = $this->object(['text' => $string, 'claim_ids' => ['type' => 'array', 'items' => ['type' => 'string', 'enum' => $claims]]]);
@@ -33,6 +39,14 @@ class AiOutputSchema
 
     public function validate(array $document, AiGenerationRun $run): array
     {
+        if ($run->task === 'verification') {
+            return Validator::make($document, [
+                'version' => ['required', Rule::in(['verification-v1'])],
+                'supported' => ['required', 'boolean'], 'faithful_translation' => ['required', 'boolean'],
+                'original' => ['required', 'boolean'], 'correct_language' => ['required', 'boolean'],
+                'issues' => ['present', 'array', 'max:30'], 'issues.*' => ['string', 'max:500'],
+            ])->validate();
+        }
         $keys = array_keys($this->jsonSchema($run)['properties']);
         $claims = array_column($run->evidence_snapshot['claims'], 'id');
         $plain = ['required', 'string', 'not_regex:/[<>\x00-\x08\x0b\x0c\x0e-\x1f]/u'];

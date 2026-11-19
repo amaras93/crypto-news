@@ -30,6 +30,9 @@ class ArticleEditor
             if (! $record->exists) {
                 $record->content_source = $source;
             }
+            if ($record->exists && $record->automation_status && $source !== ContentSource::Ai) {
+                $record->automation_status = 'paused';
+            }
             $validated = Validator::make($data, [
                 'author_id' => ['required', 'integer', 'exists:users,id'],
                 'category_id' => ['nullable', 'integer', 'exists:categories,id'],

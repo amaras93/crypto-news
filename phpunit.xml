@@ -44,6 +44,7 @@
         <env name="AI_GENERATION_ENABLED" value="false" force="true"/>
         <env name="AI_TRANSLATION_ENABLED" value="false" force="true"/>
         <env name="AI_SCHEDULED_GENERATION_ENABLED" value="false" force="true"/>
+        <env name="AI_AUTOMATIC_PUBLISHING" value="false" force="true"/>
         <env name="OPENAI_API_KEY" value="" force="true"/>
         <env name="PRICE_ALERTS_ENABLED" value="false" force="true"/>
         <env name="NEWSLETTERS_ENABLED" value="false" force="true"/>

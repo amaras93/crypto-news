@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['request_key', 'work_hash', 'active_key', 'news_candidate_id', 'requested_by', 'billing_user_id', 'author_id', 'task', 'locale', 'section_key', 'provider', 'model', 'is_simulated', 'evidence_digest', 'evidence_snapshot', 'english_digest', 'target_digest', 'confirm_human_overwrite', 'editor_regeneration_allowed'])]
 class AiGenerationRun extends Model
@@ -15,7 +16,7 @@ class AiGenerationRun extends Model
 
     protected function casts(): array
     {
-        return ['status' => AiRunStatus::class, 'is_simulated' => 'boolean', 'editor_regeneration_allowed' => 'boolean', 'confirm_human_overwrite' => 'boolean', 'evidence_snapshot' => 'encrypted:array', 'input_payload' => 'encrypted:array', 'output_document' => 'encrypted:array', 'quality_report' => 'array', 'pricing_snapshot' => 'array', 'simulated_usage' => 'array', 'request_sent_at' => 'immutable_datetime', 'retry_at' => 'immutable_datetime', 'completed_at' => 'immutable_datetime', 'section_applied_at' => 'immutable_datetime'];
+        return ['is_automated' => 'boolean', 'status' => AiRunStatus::class, 'is_simulated' => 'boolean', 'editor_regeneration_allowed' => 'boolean', 'confirm_human_overwrite' => 'boolean', 'evidence_snapshot' => 'encrypted:array', 'input_payload' => 'encrypted:array', 'output_document' => 'encrypted:array', 'quality_report' => 'array', 'pricing_snapshot' => 'array', 'simulated_usage' => 'array', 'request_sent_at' => 'immutable_datetime', 'retry_at' => 'immutable_datetime', 'completed_at' => 'immutable_datetime', 'section_applied_at' => 'immutable_datetime'];
     }
 
     public function candidate(): BelongsTo
@@ -51,5 +52,10 @@ class AiGenerationRun extends Model
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_run_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_run_id');
     }
 }

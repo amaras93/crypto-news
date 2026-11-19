@@ -1,5 +1,6 @@
 <x-filament-panels::page>
-    <p>Discovery stores permitted metadata. Draft generation needs separate administrator activation and verified factual evidence. Every AI draft and translation requires human review; automatic publishing is unavailable. Credentials stay in server configuration.</p>
+    <p>Automatic mode discovers approved sources, retrieves permitted primary evidence, generates English and seven translations, and publishes after automated checks. Human review remains available as an optional mode. Credentials stay in server configuration.</p>
+    <p><a href="{{ \App\Filament\Resources\NewsSources\NewsSourceResource::getUrl() }}">Enabled sources — manage discovery, primary material permission and AI rights</a></p>
     <dl class="grid gap-4 md:grid-cols-3">
         @foreach($this->statistics() as $label => $value)
             <div><dt class="font-semibold">{{ $label }}</dt><dd>{{ $value }}</dd></div>
@@ -15,7 +16,7 @@
         @endif
     </form>
     <h2 class="text-lg font-semibold">AI generation controls</h2>
-    <p>Server enable flags and ceilings also apply. A stopped response already received can be validated privately. Unknown provider costs remain reserved until an administrator checks provider billing records.</p>
+    <p>Server enable flags and ceilings also apply. Pilot: one article per day, seven translations, USD 1/day, USD 10/month and one concurrent AI request. Unknown provider costs remain reserved until an administrator checks provider billing records.</p>
     <form wire:submit="saveAi">
         {{ $this->aiForm }}
         @if(auth()->user()->is_admin)
@@ -31,6 +32,8 @@
         @endforeach
     </dl>
     <h2 class="text-lg font-semibold">Recent generation runs</h2>
+    <h2 class="text-lg font-semibold">Failed article monitoring</h2>
+    <p>Held candidates and articles show the reason in their administration tables. Safe rate-limit retries are bounded; uncertain costs and failed evidence remain held. Editing or unpublishing an automatic article pauses its automation.</p>
     <p><a href="{{ \App\Filament\Resources\AiGenerationRuns\AiGenerationRunResource::getUrl() }}">Inspect sources, verification reports, proposals, usage and recovery actions</a></p>
     <div class="overflow-x-auto"><table class="w-full text-left"><thead><tr><th>Run</th><th>Task</th><th>Language</th><th>Status</th><th>Mode</th><th>Error</th></tr></thead><tbody>
         @forelse($this->generationRuns() as $run)

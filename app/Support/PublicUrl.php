@@ -36,7 +36,7 @@ class PublicUrl
 
     public function isPublicTranslation(ArticleTranslation $translation): bool
     {
-        return ($translation->ai_review_status === null || $translation->ai_review_status === 'approved')
+        return ($translation->ai_review_status === null || in_array($translation->ai_review_status, ['approved', 'automated'], true))
             && $this->hasSafeArticleUrl($translation);
     }
 
